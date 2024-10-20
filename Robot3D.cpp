@@ -625,17 +625,8 @@ void keyboard(unsigned char key, int x, int y)
 	case 'n':  // Control neck (head rotation)
 		selectedJoint = 3;
 		break;
-	case 'b':  // Rotate robot's body (previously assigned to 'R')
-		robotAngle += 2.0f;
-		if (robotAngle > 360.0f) {
-			robotAngle -= 360.0f;
-		}
-		break;
-	case 'B':  // Rotate robot's body in the opposite direction
-		robotAngle -= 2.0f;
-		if (robotAngle < -360.0f) {
-			robotAngle += 360.0f;
-		}
+	case 'b':  // Select body rotation (now selectedJoint = 4)
+		selectedJoint = 4;
 		break;
 	case 'w':  // Start/Stop walking
 		walking = !walking;
@@ -665,6 +656,7 @@ void animationHandler(int param)
 	}
 }
 
+
 void functionKeys(int key, int x, int y)
 {
 	switch (key)
@@ -679,6 +671,12 @@ void functionKeys(int key, int x, int y)
 		else if (selectedJoint == 3) {
 			neckAngle += 2.0f;     // Rotate neck (left turn)
 		}
+		else if (selectedJoint == 4) {
+			robotAngle += 2.0f;    // Rotate body (left)
+			if (robotAngle > 360.0f) {
+				robotAngle -= 360.0f;
+			}
+		}
 		break;
 
 	case GLUT_KEY_RIGHT:
@@ -690,6 +688,12 @@ void functionKeys(int key, int x, int y)
 		}
 		else if (selectedJoint == 3) {
 			neckAngle -= 2.0f;     // Rotate neck (right turn)
+		}
+		else if (selectedJoint == 4) {
+			robotAngle -= 2.0f;    // Rotate body (right)
+			if (robotAngle < -360.0f) {
+				robotAngle += 360.0f;
+			}
 		}
 		break;
 
@@ -703,6 +707,9 @@ void functionKeys(int key, int x, int y)
 		else if (selectedJoint == 3) {
 			neckAngle += 2.0f;     // Rotate neck (upward turn - simulating look up)
 		}
+		else if (selectedJoint == 4) {
+			robotAngle += 2.0f;    // Optional: You can add more functionality for the body here
+		}
 		break;
 
 	case GLUT_KEY_DOWN:
@@ -714,6 +721,9 @@ void functionKeys(int key, int x, int y)
 		}
 		else if (selectedJoint == 3) {
 			neckAngle -= 2.0f;     // Rotate neck (downward turn - simulating look down)
+		}
+		else if (selectedJoint == 4) {
+			robotAngle -= 2.0f;    // Optional: You can add more functionality for the body here
 		}
 		break;
 	}
