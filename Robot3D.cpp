@@ -34,6 +34,7 @@ float baseLength = 0.4 * stanchionLength;
 float legAngle = 0.0f;        // Controls the angle of the leg during stepping
 bool spinCannon = false;      // Flag to control cannon spinning
 float cannonSpinAngle = 0.0f; // Angle for cannon spinning
+
 // Joint angles for walking
 float hipAngleLeft = 0.0f;  // Angle for left hip joint
 float kneeAngleLeft = 0.0f; // Angle for left knee joint
@@ -41,12 +42,13 @@ float ankleAngleLeft = 0.0f; // Angle for left ankle joint
 float hipAngleRight = 0.0f;  // Angle for right hip joint
 float kneeAngleRight = 0.0f; // Angle for right knee joint
 float ankleAngleRight = 0.0f; // Angle for right ankle joint
+
 // Flag to control walking state
 bool walking = false;
 bool stepBackwards = false;  // Controls whether the leg is stepping forward or backward
 bool walkingForward = true;   // Track whether we're walking forward
 int selectedJoint = 0; // 0 for none, 1 for knee, 2 for hip, 3 for body
-
+int cameraView = 0; // 0 = default, 1 = front, 2 = side, 3 = top-down
 
 // Control Robot body rotation on base
 float robotAngle = 0.0;
@@ -62,7 +64,6 @@ GLfloat robotBody_mat_ambient[] = { 0.0f,0.0f,0.0f,1.0f };
 GLfloat robotBody_mat_specular[] = { 0.45f,0.55f,0.45f,1.0f };
 GLfloat robotBody_mat_diffuse[] = { 0.8f, 0.7f, 0.5f, 1.0f };
 GLfloat robotBody_mat_shininess[] = { 32.0F };
-
 
 GLfloat robotArm_mat_ambient[] = { 0.0215f, 0.1745f, 0.0215f, 0.55f };
 GLfloat robotArm_mat_diffuse[] = { 0.4f, 0.5f, 0.2f, 1.0f };
@@ -105,7 +106,6 @@ GLfloat light_position1[] = { 4.0F, 8.0F, 8.0F, 1.0F };
 GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
 GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
 GLfloat light_ambient[] = { 0.2F, 0.2F, 0.2F, 1.0F };
-
 
 // Mouse button
 int currentButton;
@@ -211,23 +211,28 @@ void initOpenGL(int w, int h)
 
 }
 
-
-// Callback, called whenever GLUT determines that the window should be redisplayed
-// or glutPostRedisplay() has been called.
 void display(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	glLoadIdentity();
-	// Create Viewing Matrix V
-	// Set up the camera at position (0, 6, 22) looking at the origin, up along positive y axis
-	gluLookAt(35.0, 20.0, 35.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+
+	// Change camera position based on selected view
+	switch (cameraView) {
+	case 0: // Default (isometric view)
+		gluLookAt(35.0, 20.0, 35.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+		break;
+	case 1: // Front view
+		gluLookAt(0.0, 15.0, 50.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+		break;
+	case 2: // Side view
+		gluLookAt(50.0, 15.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+		break;
+	case 3: // Top-down view
+		gluLookAt(0.0, 50.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+		break;
+	}
 
 	// Draw Robot
-
-	// Apply modelling transformations M to move robot
-	// Current transformation matrix is set to IV, where I is identity matrix
-	// CTM = IV
 	drawRobot();
 
 	// Draw ground
@@ -625,8 +630,20 @@ void keyboard(unsigned char key, int x, int y)
 	case 'n':  // Control neck (head rotation)
 		selectedJoint = 3;
 		break;
-	case 'b':  // Select body rotation (now selectedJoint = 4)
+	case 'b':  // Select body rotation (selectedJoint = 4)
 		selectedJoint = 4;
+		break;
+	case '1':  // Default view (isometric)
+		cameraView = 0;
+		break;
+	case '2':  // Front view
+		cameraView = 1;
+		break;
+	case '3':  // Side view
+		cameraView = 2;
+		break;
+	case '4':  // Top-down view
+		cameraView = 3;
 		break;
 	case 'w':  // Start/Stop walking
 		walking = !walking;
