@@ -1,4 +1,4 @@
-/*******************************************************************
+ï»¿/*******************************************************************
   Hierarchical Multi-Part Model Example
 ********************************************************************/
 #include <stdlib.h>
@@ -460,6 +460,7 @@ void drawLeftArm()
 
 void drawRightArm()
 {
+	// Set material properties for the arm
 	glMaterialfv(GL_FRONT, GL_AMBIENT, robotArm_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, robotArm_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, robotArm_mat_diffuse);
@@ -467,11 +468,9 @@ void drawRightArm()
 
 	glPushMatrix();
 
-	// Correct translation to the right side of the body
-	glTranslatef(-(0.5 * robotBodyWidth + 0.5 * upperArmWidth), 0.5 * robotBodyLength, 0.0);
-
-	// Rotate around the shoulder
-	glRotatef(shoulderAngle, 1.0, 0.0, 0.0);  // Hinge at shoulder
+	// Adjust translation to mirror the left arm, move it up and forward slightly
+	glTranslatef(-(0.5 * robotBodyWidth + 0.5 * upperArmWidth), 0.2 * robotBodyLength, 0.2 * robotBodyDepth); // Moved forward slightly on the Z-axis
+	glRotatef(-45.0, 1.0, 0.0, 0.0); // Tilt arm forward
 
 	// Draw the arm (upper arm)
 	glPushMatrix();
@@ -485,30 +484,30 @@ void drawRightArm()
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, gun_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, gun_mat_shininess);
 
-	// Translate for the cannon's position relative to the arm
+	// Position the cannon at the end of the arm
 	glPushMatrix();
-	glTranslatef(0.0, -0.5 * upperArmLength - 0.5 * gunLength, 0.0);
+	glTranslatef(0.0, -0.5 * upperArmLength - 0.5 * gunLength, 0.0);  // Attach to the end of the arm
 
-	// Apply cannon spin (if activated by pressing 'C')
+	// Apply cannon spin along its Y-axis (screw-like spin)
 	if (spinCannon) {
-		glRotatef(cannonSpinAngle, 0.0, 1.0, 0.0);  // Spin along the vertical axis (Y-axis)
+		glRotatef(cannonSpinAngle, 0.0, 1.0, 0.0);  // Spin along the Y-axis
 	}
 
 	// Draw the gun (cannon body)
 	glPushMatrix();
 	glScalef(gunWidth, gunLength, gunDepth);
-	glutSolidCube(1.0);
+	glutSolidCube(1.0);  // Cannon body
 	glPopMatrix();
 
 	// Draw the cannon barrel (cylinder)
 	glPushMatrix();
-	glTranslatef(0.0, -0.5 * gunLength, 0.0);  // Position at the end of the cannon
-	glRotatef(90.0, 1.0, 0.0, 0.0);  // Align the barrel properly
+	glTranslatef(0.0, -0.5 * gunLength, 0.0);  // Move to the end of the cannon
+	glRotatef(90.0, 1.0, 0.0, 0.0);  // Align the cylinder properly
 	GLUquadric* quad = gluNewQuadric();
 	gluCylinder(quad, 1.5, 1.5, 5.0, 40, 20);  // Barrel
 	glPopMatrix();
 
-	// Add the orange projectile inside the cannon
+	// Draw the orange projectile inside the cannon
 	glPushMatrix();
 	glMaterialfv(GL_FRONT, GL_AMBIENT, red_orange_ambient);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, red_orange_diffuse);
@@ -519,8 +518,14 @@ void drawRightArm()
 	glutSolidCube(1.0);  // The orange projectile
 	glPopMatrix();
 
-	glPopMatrix();  // End cannon drawing
+	// Draw the magazine under the cannon
+	glPushMatrix();
+	glTranslatef(0.0, -gunLength - 1.0, 0.0);  // Position magazine below the cannon
+	glScalef(gunWidth * 0.8, gunLength * 0.4, gunDepth * 0.8);  // Scale the magazine
+	glutSolidCube(1.0);
+	glPopMatrix();
 
+	glPopMatrix();  // End cannon drawing
 	glPopMatrix();  // End arm drawing
 }
 
@@ -596,17 +601,12 @@ void cannonAnimation(int value)
 {
 	if (spinCannon)
 	{
-		shoulderAngle += 5.0f;  // Increment the shoulder angle to rotate the arm and cannon
-
-		if (shoulderAngle > 360.0f)
-		{
-			shoulderAngle -= 360.0f;  // Reset angle after full rotation
+		cannonSpinAngle += 5.0f;  // Increment the cannon spin angle to rotate the cannon
+		if (cannonSpinAngle > 360.0f) {
+			cannonSpinAngle -= 360.0f;  // Reset the angle after a full rotation
 		}
-
-		glutPostRedisplay();  // Redraw to show the updated arm and cannon position
-
-		// Continue the animation
-		glutTimerFunc(10, cannonAnimation, 0);
+		glutPostRedisplay();  // Redraw to show the updated cannon position
+		glutTimerFunc(10, cannonAnimation, 0);  // Continue spinning the cannon
 	}
 }
 
@@ -623,10 +623,10 @@ void keyboard(unsigned char key, int x, int y)
 	case 'b': // Adjust body rotation or another joint
 		selectedJoint = 3;
 		break;
-	case 'r': // Rotate the robot’s body
+	case 'r': // Rotate the robot's body
 		robotAngle += 2.0;
 		break;
-	case 'R': // Rotate the robot’s body in the opposite direction
+	case 'R': // Rotate the robot's body in the opposite direction
 		robotAngle -= 2.0;
 		break;
 	case 'w': // Start walking animation
@@ -636,11 +636,10 @@ void keyboard(unsigned char key, int x, int y)
 		}
 		break;
 
-		// Start rotating the arm and cannon
+		// Toggle cannon spin when 'c' is pressed
 	case 'c':
-		spinCannon = !spinCannon;  // Toggle the spinning state
+		spinCannon = !spinCannon;  // Toggle spinning state
 		if (spinCannon) {
-			shoulderAngle = 0.0;  // Ensure the shoulder rotation starts at 0
 			glutTimerFunc(10, cannonAnimation, 0);  // Start cannon animation
 		}
 		break;
@@ -648,7 +647,7 @@ void keyboard(unsigned char key, int x, int y)
 		// Stop cannon rotation and reset the angle
 	case 'C':
 		spinCannon = false;  // Disable spinning
-		shoulderAngle = 0.0f;  // Reset the shoulder rotation
+		cannonSpinAngle = 0.0f;  // Reset the cannon spin angle
 		glutPostRedisplay();  // Redraw
 		break;
 
