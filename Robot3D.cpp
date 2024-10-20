@@ -467,79 +467,61 @@ void drawRightArm()
 
 	glPushMatrix();
 
-	// Rotate arm at shoulder
-	glTranslatef(-(0.5 * robotBodyWidth + 0.5 * upperArmWidth), 0.5 * upperArmLength, 0.0);
-	glRotatef(shoulderAngle, 1.0, 0.0, 0.0);
-	glTranslatef((0.5 * robotBodyWidth + 0.5 * upperArmWidth), -0.5 * upperArmLength, 0.0);
+	// Correct translation to the right side of the body
+	glTranslatef(-(0.5 * robotBodyWidth + 0.5 * upperArmWidth), 0.5 * robotBodyLength, 0.0);
 
-	// Position arm and gun with respect to parent body
-	glTranslatef(-(0.5 * robotBodyWidth + 0.5 * upperArmWidth), 0, 0.0);
+	// Rotate around the shoulder
+	glRotatef(shoulderAngle, 1.0, 0.0, 0.0);  // Hinge at shoulder
 
-	// Build arm
+	// Draw the arm (upper arm)
 	glPushMatrix();
 	glScalef(upperArmWidth, upperArmLength, upperArmWidth);
 	glutSolidCube(1.0);
 	glPopMatrix();
 
-	// Gun
+	// Now handle the cannon attached to the arm
 	glMaterialfv(GL_FRONT, GL_AMBIENT, gun_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, gun_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, gun_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, gun_mat_shininess);
 
+	// Translate for the cannon's position relative to the arm
 	glPushMatrix();
-	// Apply the cannon spinning animation using cannonSpinAngle
-	glTranslatef(-(0.5 * robotBodyWidth + 0.5 * upperArmWidth), -(0.5 * upperArmLength), 0.0);
-	glRotatef(cannonSpinAngle, 0.0, 0.0, 1.0);  // Spin the cannon along the Z-axis
-	glTranslatef((0.5 * robotBodyWidth + 0.5 * upperArmWidth), (0.5 * upperArmLength), 0.0);
+	glTranslatef(0.0, -0.5 * upperArmLength - 0.5 * gunLength, 0.0);
 
-	// Position gun with respect to parent arm
-	glTranslatef(0, -(0.5 * upperArmLength + 0.5 * gunLength), 0.0);
+	// Apply cannon spin (if activated by pressing 'C')
+	if (spinCannon) {
+		glRotatef(cannonSpinAngle, 0.0, 1.0, 0.0);  // Spin along the vertical axis (Y-axis)
+	}
 
-	// Build simplified gun body (cube)
+	// Draw the gun (cannon body)
 	glPushMatrix();
 	glScalef(gunWidth, gunLength, gunDepth);
 	glutSolidCube(1.0);
 	glPopMatrix();
 
-	// Build simplified gun barrel (cylinder)
+	// Draw the cannon barrel (cylinder)
 	glPushMatrix();
-	// Position the cylinder in front of the cube
-	glTranslatef(0.0, -0.5 * gunLength + 0.5, 0.0);
-	glRotatef(90.0, 1.0, 0.0, 0.0); // Align the cylinder with the correct axis
+	glTranslatef(0.0, -0.5 * gunLength, 0.0);  // Position at the end of the cannon
+	glRotatef(90.0, 1.0, 0.0, 0.0);  // Align the barrel properly
 	GLUquadric* quad = gluNewQuadric();
-	gluCylinder(quad, 1.5, 1.5, 5.0, 40, 20); // A long, thin cylinder for the barrel
+	gluCylinder(quad, 1.5, 1.5, 5.0, 40, 20);  // Barrel
 	glPopMatrix();
 
-	// Add the red/orange rectangle inside the cylinder
+	// Add the orange projectile inside the cannon
 	glPushMatrix();
-	// Set the color for the red/orange rectangle
-	GLfloat red_orange_ambient[] = { 0.8f, 0.2f, 0.0f, 1.0f };
-	GLfloat red_orange_diffuse[] = { 0.9f, 0.3f, 0.1f, 1.0f };
-	GLfloat red_orange_specular[] = { 0.8f, 0.2f, 0.1f, 1.0f };
-	GLfloat red_orange_shininess[] = { 32.0F };
-
 	glMaterialfv(GL_FRONT, GL_AMBIENT, red_orange_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, red_orange_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, red_orange_diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, red_orange_specular);
 	glMaterialfv(GL_FRONT, GL_SHININESS, red_orange_shininess);
-
-	// Position and size the red/orange rectangle inside the cylinder
-	glTranslatef(0.0, -2.5 * gunLength, 0.0); // Adjust position inside cylinder
-	glScalef(gunWidth * 0.5, gunLength * 0.1, gunDepth * 0.5); // Size the rectangle
-	glutSolidCube(1.0); // Draw the red/orange rectangle
+	glTranslatef(0.0, -2.5 * gunLength, 0.0);  // Inside the cannon
+	glScalef(gunWidth * 0.5, gunLength * 0.1, gunDepth * 0.5);
+	glutSolidCube(1.0);  // The orange projectile
 	glPopMatrix();
 
-	// Add a magazine to the gun
-	glPushMatrix();
-	// Position the magazine below the gun body
-	glTranslatef(0.0, -gunLength - 1.0, 0.0); // Move below the gun
-	glScalef(gunWidth * 0.8, gunLength * 0.4, gunDepth * 0.8); // Adjust size of the magazine
-	glutSolidCube(1.0);
-	glPopMatrix();
+	glPopMatrix();  // End cannon drawing
 
-	glPopMatrix(); // Close gun matrix
-	glPopMatrix(); // Close arm matrix
+	glPopMatrix();  // End arm drawing
 }
 
 void reshape(int w, int h)
@@ -612,19 +594,19 @@ void stepAnimation(int value)
 
 void cannonAnimation(int value)
 {
-	if (spinCannon) // Only spin the cannon when the flag is set
+	if (spinCannon)
 	{
-		cannonSpinAngle += 5.0f; // Increase the angle to spin the cannon
+		shoulderAngle += 5.0f;  // Increment the shoulder angle to rotate the arm and cannon
 
-		if (cannonSpinAngle > 360.0f) // Wrap the angle after a full rotation
+		if (shoulderAngle > 360.0f)
 		{
-			cannonSpinAngle -= 360.0f;
+			shoulderAngle -= 360.0f;  // Reset angle after full rotation
 		}
 
-		glutPostRedisplay(); // Redraw to show the updated cannon position
+		glutPostRedisplay();  // Redraw to show the updated arm and cannon position
 
-		// Keep the animation going
-		glutTimerFunc(100, cannonAnimation, 0);
+		// Continue the animation
+		glutTimerFunc(10, cannonAnimation, 0);
 	}
 }
 
@@ -647,32 +629,34 @@ void keyboard(unsigned char key, int x, int y)
 	case 'R': // Rotate the robot’s body in the opposite direction
 		robotAngle -= 2.0;
 		break;
-
-		// Toggle walking animation
-	case 'w':
-		walking = !walking; // Toggle walking on or off
+	case 'w': // Start walking animation
+		walking = !walking;
 		if (walking) {
-			glutTimerFunc(10, stepAnimation, 0);  // Start walking animation
+			glutTimerFunc(10, stepAnimation, 0);  // Start the walking animation
 		}
 		break;
 
-		// Start spinning the cannon
+		// Start rotating the arm and cannon
 	case 'c':
-		spinCannon = !spinCannon;  // Toggle spinning
+		spinCannon = !spinCannon;  // Toggle the spinning state
 		if (spinCannon) {
+			shoulderAngle = 0.0;  // Ensure the shoulder rotation starts at 0
 			glutTimerFunc(10, cannonAnimation, 0);  // Start cannon animation
 		}
 		break;
 
-		// Stop cannon spinning and reset angle
+		// Stop cannon rotation and reset the angle
 	case 'C':
 		spinCannon = false;  // Disable spinning
-		cannonSpinAngle = 0.0f;  // Reset spin angle
+		shoulderAngle = 0.0f;  // Reset the shoulder rotation
 		glutPostRedisplay();  // Redraw
+		break;
+
+	default:
 		break;
 	}
 
-	glutPostRedisplay();   // Trigger a window redisplay
+	glutPostRedisplay();  // Trigger window redisplay after key press
 }
 
 void animationHandler(int param)
