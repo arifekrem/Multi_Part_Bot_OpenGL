@@ -50,6 +50,7 @@ int selectedJoint = 0; // 0 for none, 1 for knee, 2 for hip, 3 for body
 
 // Control Robot body rotation on base
 float robotAngle = 0.0;
+float neckAngle = 0.0f;   // Neck rotation
 
 // Control arm rotation
 float shoulderAngle = -40.0;
@@ -311,8 +312,9 @@ void drawHead()
 	glMaterialfv(GL_FRONT, GL_SHININESS, robotBody_mat_shininess);
 
 	glPushMatrix();
-	// Position head with respect to parent (body)
-	glTranslatef(0, 0.5 * robotBodyLength + 1.0 * headLength, 0); // Move head even higher
+	// Apply neck rotation
+	glRotatef(neckAngle, 0.0, 1.0, 0.0);  // Rotate neck along Y-axis
+	glTranslatef(0, 0.5 * robotBodyLength + 1.0 * headLength, 0); // Move head above the body
 
 	// Build the head
 	glPushMatrix();
@@ -614,48 +616,43 @@ void keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-	case 'k': // Adjust knee angle
+	case 'k':  // Control knees
 		selectedJoint = 1;
 		break;
-	case 'h': // Adjust hip angle
+	case 'h':  // Control hips
 		selectedJoint = 2;
 		break;
-	case 'b': // Adjust body rotation or another joint
+	case 'n':  // Control neck (head rotation)
 		selectedJoint = 3;
 		break;
-	case 'r': // Rotate the robot's body
-		robotAngle += 2.0;
+	case 'b':  // Rotate robot's body (previously assigned to 'R')
+		robotAngle += 2.0f;
+		if (robotAngle > 360.0f) {
+			robotAngle -= 360.0f;
+		}
 		break;
-	case 'R': // Rotate the robot's body in the opposite direction
-		robotAngle -= 2.0;
+	case 'B':  // Rotate robot's body in the opposite direction
+		robotAngle -= 2.0f;
+		if (robotAngle < -360.0f) {
+			robotAngle += 360.0f;
+		}
 		break;
-	case 'w': // Start walking animation
+	case 'w':  // Start/Stop walking
 		walking = !walking;
 		if (walking) {
-			glutTimerFunc(10, stepAnimation, 0);  // Start the walking animation
+			glutTimerFunc(10, stepAnimation, 0);  // Start walking animation
 		}
 		break;
-
-		// Toggle cannon spin when 'c' is pressed
-	case 'c':
-		spinCannon = !spinCannon;  // Toggle spinning state
+	case 'c':  // Toggle cannon spinning
+		spinCannon = !spinCannon;
 		if (spinCannon) {
-			glutTimerFunc(10, cannonAnimation, 0);  // Start cannon animation
+			glutTimerFunc(10, cannonAnimation, 0);
 		}
 		break;
-
-		// Stop cannon rotation and reset the angle
-	case 'C':
-		spinCannon = false;  // Disable spinning
-		cannonSpinAngle = 0.0f;  // Reset the cannon spin angle
-		glutPostRedisplay();  // Redraw
-		break;
-
 	default:
 		break;
 	}
-
-	glutPostRedisplay();  // Trigger window redisplay after key press
+	glutPostRedisplay();
 }
 
 void animationHandler(int param)
@@ -674,47 +671,52 @@ void functionKeys(int key, int x, int y)
 	{
 	case GLUT_KEY_LEFT:
 		if (selectedJoint == 1) {
-			kneeAngleLeft += 2.0f;  // Increment left knee angle
+			kneeAngleLeft += 2.0f;  // Rotate left knee
 		}
 		else if (selectedJoint == 2) {
-			hipAngleLeft += 2.0f;   // Increment left hip angle
+			hipAngleLeft += 2.0f;   // Rotate left hip
 		}
 		else if (selectedJoint == 3) {
-			robotAngle += 2.0f;     // Rotate the entire body
+			neckAngle += 2.0f;     // Rotate neck (left turn)
 		}
 		break;
 
 	case GLUT_KEY_RIGHT:
 		if (selectedJoint == 1) {
-			kneeAngleLeft -= 2.0f;  // Decrement left knee angle
+			kneeAngleLeft -= 2.0f;  // Rotate left knee in the opposite direction
 		}
 		else if (selectedJoint == 2) {
-			hipAngleLeft -= 2.0f;   // Decrement left hip angle
+			hipAngleLeft -= 2.0f;   // Rotate left hip in the opposite direction
 		}
 		else if (selectedJoint == 3) {
-			robotAngle -= 2.0f;     // Rotate the entire body in the opposite direction
+			neckAngle -= 2.0f;     // Rotate neck (right turn)
 		}
 		break;
 
 	case GLUT_KEY_UP:
 		if (selectedJoint == 1) {
-			kneeAngleRight += 2.0f;  // Increment right knee angle
+			kneeAngleRight += 2.0f;  // Rotate right knee
 		}
 		else if (selectedJoint == 2) {
-			hipAngleRight += 2.0f;   // Increment right hip angle
+			hipAngleRight += 2.0f;   // Rotate right hip
+		}
+		else if (selectedJoint == 3) {
+			neckAngle += 2.0f;     // Rotate neck (upward turn - simulating look up)
 		}
 		break;
 
 	case GLUT_KEY_DOWN:
 		if (selectedJoint == 1) {
-			kneeAngleRight -= 2.0f;  // Decrement right knee angle
+			kneeAngleRight -= 2.0f;  // Rotate right knee in the opposite direction
 		}
 		else if (selectedJoint == 2) {
-			hipAngleRight -= 2.0f;   // Decrement right hip angle
+			hipAngleRight -= 2.0f;   // Rotate right hip in the opposite direction
+		}
+		else if (selectedJoint == 3) {
+			neckAngle -= 2.0f;     // Rotate neck (downward turn - simulating look down)
 		}
 		break;
 	}
-
 	glutPostRedisplay();   // Trigger redraw to apply changes
 }
 
