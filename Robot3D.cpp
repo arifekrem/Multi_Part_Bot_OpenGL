@@ -645,18 +645,18 @@ void drawLeftArm()
 	// Position the hand at the end of the arm
 	glPushMatrix();
 	glTranslatef(0.0, -0.5 * upperArmLength - 0.2, 0.0);  // Attach to the end of the arm
-	glScalef(0.5 * upperArmWidth, 0.3 * upperArmLength, 0.5 * upperArmWidth);  // Adjust hand size
-	glutSolidCube(1.0);  // Hand
+	glScalef(0.7 * upperArmWidth, 0.5 * upperArmLength, 0.7 * upperArmWidth);  // Increased palm thickness
+	glutSolidCube(1.0);  // Hand (palm)
 
-	// Now we add the 5 fingers (thicker)
+	// Now we add the 5 fingers (thicker and shorter)
 	float fingerWidth = 0.06 * upperArmWidth; // Thicker fingers
-	float fingerLength = 0.1 * upperArmLength; // Shorter length for fingers
+	float fingerLength = 0.05 * upperArmLength; // Shorter length for fingers
 
 	// Draw 5 fingers
 	for (int i = -2; i <= 2; i++) {
 		glPushMatrix();
-		glTranslatef(i * (0.12 * upperArmWidth), -0.3 * (0.3 * upperArmLength), 0.0);  // Move fingers up and space them evenly
-		glScalef(fingerWidth, fingerLength, fingerWidth);  // Scale fingers to thicker size
+		glTranslatef(i * (0.12 * upperArmWidth), -0.2 * (0.3 * upperArmLength), 0.0);  // Move fingers up
+		glScalef(fingerWidth, fingerLength, fingerWidth);  // Scale fingers to thicker and shorter size
 		glutSolidCube(1.0);
 		glPopMatrix();
 	}
