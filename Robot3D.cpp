@@ -42,6 +42,8 @@ float ankleAngleLeft = 0.0f; // Angle for left ankle joint
 float hipAngleRight = 0.0f;  // Angle for right hip joint
 float kneeAngleRight = 0.0f; // Angle for right knee joint
 float ankleAngleRight = 0.0f; // Angle for right ankle joint
+float lowerLegAngleLeft = 0.0f;  // Angle for rotating lower part of the left leg
+float lowerLegAngleRight = 0.0f; // Angle for rotating lower part of the right leg
 
 // Flag to control walking state
 bool walking = false;
@@ -477,6 +479,8 @@ void drawLowerBody()
 
 	// Move down for the second (third part) green leg
 	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
+	// Lower leg rotation
+	glRotatef(lowerLegAngleLeft, 1.0, 0.0, 0.0);
 
 	// Second green part - same size as the previous green part
 	glPushMatrix();
@@ -891,6 +895,12 @@ void keyboard(unsigned char key, int x, int y)
 	case 'b':  // Select body rotation
 		selectedJoint = 4;
 		break;
+	case 'l':  // Control lower part of the left leg (between middle and lower sections)
+		selectedJoint = 5;
+		break;
+	case 'a': // Control ankle
+		selectedJoint = 6;
+		break;
 	case '1':  // Default view (isometric)
 		cameraView = 0;
 		break;
@@ -955,6 +965,14 @@ void functionKeys(int key, int x, int y)
 				robotAngle -= 360.0f;
 			}
 		}
+		// Rotate lower left leg
+		else if (selectedJoint == 5) {
+			lowerLegAngleLeft += 2.0f;  // Rotate lower left leg
+		}
+		// Rotate ankle
+		else if (selectedJoint == 6) {
+			ankleAngleLeft += 2.0f;
+		}
 		break;
 
 	case GLUT_KEY_RIGHT:
@@ -977,6 +995,14 @@ void functionKeys(int key, int x, int y)
 				robotAngle += 360.0f;
 			}
 		}
+		// Rotate lower left leg in opposite direction
+		else if (selectedJoint == 5) {
+			lowerLegAngleLeft -= 2.0f;  // Rotate lower left leg in the opposite direction
+		}
+		// Rotate ankle
+		else if (selectedJoint == 6) {
+			ankleAngleLeft -= 2.0f;
+		}
 		break;
 
 	case GLUT_KEY_UP:
@@ -995,6 +1021,14 @@ void functionKeys(int key, int x, int y)
 		else if (selectedJoint == 4) {
 			robotAngle += 2.0f;    // Optional: You can add more functionality for the body here
 		}
+		// Rotate lower left leg in opposite direction
+		else if (selectedJoint == 5) {
+			lowerLegAngleLeft += 2.0f;  // Rotate lower left leg in the opposite direction
+		}
+		// Rotate ankle
+		else if (selectedJoint == 6) {
+			ankleAngleLeft += 2.0f;
+		}
 		break;
 
 	case GLUT_KEY_DOWN:
@@ -1012,6 +1046,14 @@ void functionKeys(int key, int x, int y)
 		}
 		else if (selectedJoint == 4) {
 			robotAngle -= 2.0f;    // Optional: You can add more functionality for the body here
+		}
+		// Rotate lower left leg
+		else if (selectedJoint == 5) {
+			lowerLegAngleLeft -= 2.0f;  // Rotate lower left leg
+		}
+		// Rotate ankle
+		else if (selectedJoint == 6) {
+			ankleAngleLeft -= 2.0f;
 		}
 		break;
 	}
