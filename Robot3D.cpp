@@ -612,7 +612,7 @@ void drawLowerBody()
 	// Move down for the second green part (right leg)
 	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
 	// Lower leg rotation
-	glRotatef(lowerLegAngleLeft, 1.0, 0.0, 0.0);
+	glRotatef(lowerLegAngleRight, 1.0, 0.0, 0.0);
 
 	// Second green part (right leg)
 	glPushMatrix();
@@ -821,45 +821,47 @@ bool stop = false;
 void stepAnimation(int value)
 {
 	if (walking) {
-		// Move left leg forward, right leg backward
+		// Move legs in opposite directions
 		if (walkingForward) {
-			// Move left leg forward
+			// Move left leg forward, right leg backward
 			if (hipAngleLeft < 50.0f) {
 				hipAngleLeft += 2.0f;   // Raise left hip
 				kneeAngleLeft -= 1.5f;  // Bend left knee
 				ankleAngleLeft += 1.0f; // Raise left ankle
 				lowerLegAngleLeft += 2.0f; // Rotate the lower leg at the new joint
 			}
-			else {
-				walkingForward = false;  // Switch to moving backward
-			}
 
-			// Move right leg backward
 			if (hipAngleRight > -50.0f) {
 				hipAngleRight -= 2.0f;   // Lower right hip
 				kneeAngleRight += 1.5f;  // Straighten right knee
 				ankleAngleRight -= 1.0f; // Lower right ankle
 				lowerLegAngleRight -= 2.0f; // Rotate the lower leg at the new joint
 			}
+
+			// If both legs have reached their maximum angles, switch direction
+			if (hipAngleLeft >= 50.0f && hipAngleRight <= -50.0f) {
+				walkingForward = false;  // Switch to moving backward
+			}
 		}
 		else { // Move legs in reverse direction (reset position)
-			// Move left leg backward
+			// Move left leg backward, right leg forward
 			if (hipAngleLeft > 0.0f) {
 				hipAngleLeft -= 2.0f;   // Lower left hip
 				kneeAngleLeft += 1.5f;  // Straighten left knee
 				ankleAngleLeft -= 1.0f; // Lower left ankle
 				lowerLegAngleLeft -= 2.0f; // Reset the lower leg joint angle
 			}
-			else {
-				walkingForward = true;   // Switch to moving forward
-			}
 
-			// Move right leg forward
 			if (hipAngleRight < 0.0f) {
 				hipAngleRight += 2.0f;   // Raise right hip
 				kneeAngleRight -= 1.5f;  // Bend right knee
 				ankleAngleRight += 1.0f; // Raise right ankle
 				lowerLegAngleRight += 2.0f; // Rotate the lower leg at the new joint
+			}
+
+			// If both legs have returned to their starting angles, switch direction
+			if (hipAngleLeft <= 0.0f && hipAngleRight >= 0.0f) {
+				walkingForward = true;   // Switch to moving forward
 			}
 		}
 
