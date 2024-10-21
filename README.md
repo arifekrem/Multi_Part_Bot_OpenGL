@@ -1,4 +1,4 @@
-# cps511A1
+# CPS511 Assignment1
 
 To compile the program you will need Visual Studio (used 2022) for Windows, the files Robot3D.cpp, QuadMesh.cpp, QuadMesh.h, and VECTOR3D.h.
 Because we are using VS you will also need the .sln and .vcxproj makefiles. There are no extra libraries/dependencies used other than
