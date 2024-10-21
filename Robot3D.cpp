@@ -72,30 +72,30 @@ GLfloat robotArm_mat_diffuse[] = { 0.4f, 0.5f, 0.2f, 1.0f };
 GLfloat robotArm_mat_specular[] = { 0.7f, 0.6f, 0.6f, 1.0f };
 GLfloat robotArm_mat_shininess[] = { 32.0F };
 
-GLfloat dark_grey_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-GLfloat dark_grey_diffuse[] = { 0.15f, 0.15f, 0.15f, 1.0f };
-GLfloat dark_grey_specular[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-GLfloat dark_grey_shininess[] = { 50.0f };
+GLfloat gun_mat_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+GLfloat gun_mat_diffuse[] = { 0.1f, 0.1f, 0.1f, 0.01f };
+GLfloat gun_mat_specular[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+GLfloat gun_mat_shininess[] = { 100.0F };
 
 GLfloat robotLowerBody_mat_ambient[] = { 0.25f, 0.25f, 0.25f, 1.0f };
 GLfloat robotLowerBody_mat_diffuse[] = { 0.4f, 0.4f, 0.4f, 1.0f };
 GLfloat robotLowerBody_mat_specular[] = { 0.774597f, 0.774597f, 0.774597f, 1.0f };
 GLfloat robotLowerBody_mat_shininess[] = { 76.8F };
 
-GLfloat green_mat_ambient[] = { 0.02f, 0.15f, 0.02f, 1.0f };
-GLfloat green_mat_diffuse[] = { 0.05f, 0.2f, 0.05f, 0.1f };
-GLfloat green_mat_specular[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-GLfloat green_mat_shininess[] = { 100.0f };
+GLfloat green_mat_ambient[] = { 0.0, 0.5, 0.0, 1.0 };
+GLfloat green_mat_specular[] = { 0.1, 0.1, 0.1, 1.0 };
+GLfloat green_mat_diffuse[] = { 0.0, 0.6, 0.0, 1.0 };
+GLfloat green_mat_shininess[] = { 30.0 };
 
-GLfloat beige_mat_ambient[] = { 0.6f, 0.5f, 0.3f, 1.0f };
-GLfloat beige_mat_specular[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-GLfloat beige_mat_diffuse[] = { 0.7f, 0.6f, 0.4f, 1.0f };
-GLfloat beige_mat_shininess[] = { 30.0f };
+GLfloat beige_mat_ambient[] = { 0.8, 0.7, 0.5, 1.0 };
+GLfloat beige_mat_specular[] = { 0.1, 0.1, 0.1, 1.0 };
+GLfloat beige_mat_diffuse[] = { 0.9, 0.8, 0.6, 1.0 };
+GLfloat beige_mat_shininess[] = { 30.0 };
 
-GLfloat light_brown_mat_ambient[] = { 0.3f, 0.2f, 0.1f, 1.0f };
-GLfloat light_brown_mat_specular[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-GLfloat light_brown_mat_diffuse[] = { 0.4f, 0.3f, 0.2f, 1.0f };
-GLfloat light_brown_mat_shininess[] = { 30.0f };
+GLfloat light_brown_mat_ambient[] = { 0.6, 0.3, 0.1, 1.0 };
+GLfloat light_brown_mat_specular[] = { 0.1, 0.1, 0.1, 1.0 };
+GLfloat light_brown_mat_diffuse[] = { 0.7, 0.4, 0.2, 1.0 };
+GLfloat light_brown_mat_shininess[] = { 30.0 };
 
 GLfloat red_orange_ambient[] = { 0.8f, 0.2f, 0.0f, 1.0f };
 GLfloat red_orange_diffuse[] = { 0.9f, 0.3f, 0.1f, 1.0f };
@@ -288,10 +288,10 @@ void drawBody()
 	// Middle Part (Black, thin and long)
 	glPushMatrix();
 	// Set material properties for the black middle part
-	glMaterialfv(GL_FRONT, GL_AMBIENT, dark_grey_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, dark_grey_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, dark_grey_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, dark_grey_shininess);
+	glMaterialfv(GL_FRONT, GL_AMBIENT, gun_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, gun_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, gun_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, gun_mat_shininess);
 
 	// Position and scale the middle part
 	glTranslatef(0.0, 0.0, 0.0);  // Middle part stays in the center
@@ -310,15 +310,16 @@ void drawHead()
 	GLfloat white_specular[] = { 0.5f, 0.5f, 0.5f, 1.0f };
 	GLfloat white_shininess[] = { 50.0f };
 
-	GLfloat cyan_ambient[] = { 0.0f, 1.0f, 1.0f, 1.0f };
-	GLfloat cyan_diffuse[] = { 0.0f, 1.0f, 1.0f, 1.0f };
-	GLfloat cyan_specular[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-	GLfloat cyan_shininess[] = { 30.0f };
+	// Darker grey for the grey parts
+	GLfloat dark_grey_ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+	GLfloat dark_grey_diffuse[] = { 0.2f, 0.2f, 0.2f, 0.1f };
+	GLfloat dark_grey_specular[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+	GLfloat dark_grey_shininess[] = { 50.0f };
 
-	glMaterialfv(GL_FRONT, GL_AMBIENT, dark_grey_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, dark_grey_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, dark_grey_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, dark_grey_shininess);
+	GLfloat blue_ambient[] = { 0.0f, 0.0f, 1.0f, 1.0f };
+	GLfloat blue_diffuse[] = { 0.0f, 0.0f, 1.0f, 1.0f };
+	GLfloat blue_specular[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+	GLfloat blue_shininess[] = { 30.0f };
 
 	glPushMatrix();
 	// Apply neck rotation
@@ -336,10 +337,16 @@ void drawHead()
 	glutSolidCube(1.0);
 	glPopMatrix();
 
-	glMaterialfv(GL_FRONT, GL_AMBIENT, green_mat_ambient);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, green_mat_specular);
-	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
+	// Draw the green sides
+	GLfloat green_ambient[] = { 0.0, 0.5, 0.0, 1.0 };
+	GLfloat green_diffuse[] = { 0.0, 0.6, 0.0, 1.0 };
+	GLfloat green_specular[] = { 0.1, 0.1, 0.1, 1.0 };
+	GLfloat green_shininess[] = { 30.0 };
+
+	glMaterialfv(GL_FRONT, GL_AMBIENT, green_ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, green_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, green_shininess);
 
 	// Draw left side of the head
 	glPushMatrix();
@@ -377,10 +384,10 @@ void drawHead()
 
 	// Blue eye (upright visor-like stripe)
 	glPushMatrix();
-	glMaterialfv(GL_FRONT, GL_AMBIENT, cyan_ambient);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, cyan_diffuse);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, cyan_specular);
-	glMaterialfv(GL_FRONT, GL_SHININESS, cyan_shininess);
+	glMaterialfv(GL_FRONT, GL_AMBIENT, blue_ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, blue_diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, blue_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, blue_shininess);
 
 	// Position the blue visor/eye on the front
 	glTranslatef(0.0, 0.1 * robotBodyWidth, 0.22 * robotBodyWidth);  // Position it on the front
@@ -673,67 +680,39 @@ void drawLowerBody()
 	glPopMatrix(); // End right leg
 }
 
+
 void drawLeftArm()
 {
-	// Set the material for the arm (green)
-	glMaterialfv(GL_FRONT, GL_AMBIENT, green_mat_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, green_mat_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
+	// Set the material for the arm
+	glMaterialfv(GL_FRONT, GL_AMBIENT, robotArm_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, robotArm_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, robotArm_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, robotArm_mat_shininess);
 
 	glPushMatrix();
-	// Position upper arm higher to connect with the body
-	glTranslatef(0.5 * robotBodyWidth + 0.5 * upperArmWidth, 0.3 * robotBodyLength, 0.0); // Adjusted Y position to connect with body
+	// Position arm with respect to parent body
+	glTranslatef(0.5 * robotBodyWidth + 0.5 * upperArmWidth, 0, 0.0); // this will be done last
 
-	// Draw upper arm (green part)
+	// Build arm
 	glPushMatrix();
-	glScalef(upperArmWidth, 0.6 * upperArmLength, upperArmWidth); // Upper part is shorter
+	glScalef(upperArmWidth, upperArmLength, upperArmWidth);
 	glutSolidCube(1.0);
 	glPopMatrix();
 
-	// Add the elbow joint (grey part)
+	// Now let's add a hand at the end of the arm
+	// Use the gun material properties for the hand color
+	glMaterialfv(GL_FRONT, GL_AMBIENT, gun_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, gun_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, gun_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, gun_mat_shininess);
+
+	// Position the hand at the end of the arm
 	glPushMatrix();
-	glMaterialfv(GL_FRONT, GL_AMBIENT, dark_grey_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, dark_grey_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, dark_grey_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, dark_grey_shininess);
-
-	// Position and scale the elbow
-	glTranslatef(0.0, -0.5 * 0.6 * upperArmLength, 0.0); // Adjust based on upper arm length
-	glScalef(1.2 * upperArmWidth, 0.1 * upperArmLength, 1.2 * upperArmWidth); // Slightly larger elbow joint
-	glutSolidCube(1.0);  // Draw elbow
-	glPopMatrix();
-
-	// Move down for the lower arm and translate further forward along Z-axis
-	glTranslatef(0.0, -0.9 * 0.6 * upperArmLength, 1.1); // Slightly increased forward translation along the Z-axis
-
-	// Apply rotation to the lower arm for an angled effect
-	glRotatef(-30.0, 1.0, 0.0, 0.0); // Rotate around the X-axis to make the lower arm angled
-
-	// Draw lower arm (green part)
-	glPushMatrix();
-	glMaterialfv(GL_FRONT, GL_AMBIENT, green_mat_ambient);  // Set back to green for the lower arm
-	glMaterialfv(GL_FRONT, GL_SPECULAR, green_mat_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
-
-	glScalef(upperArmWidth, 0.6 * upperArmLength, upperArmWidth); // Lower part is also shorter
-	glutSolidCube(1.0);
-	glPopMatrix();
-
-	// Now draw the hand
-	glMaterialfv(GL_FRONT, GL_AMBIENT, dark_grey_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, dark_grey_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, dark_grey_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, dark_grey_shininess);
-
-	// Position the hand slightly above and more inside the lower arm
-	glPushMatrix();
-	glTranslatef(0.0, -0.35 * 0.6 * upperArmLength - 0.15, 0.0);  // Adjusted Y position to bring the hand inside the lower arm
-	glScalef(0.7 * upperArmWidth, 0.5 * upperArmLength, 0.7 * upperArmWidth);  // Scale for the hand
+	glTranslatef(0.0, -0.5 * upperArmLength - 0.2, 0.0);  // Attach to the end of the arm
+	glScalef(0.7 * upperArmWidth, 0.5 * upperArmLength, 0.7 * upperArmWidth);  // Increased palm thickness
 	glutSolidCube(1.0);  // Hand (palm)
 
-	// Add the fingers
+	// Now we add the 5 fingers (thicker and shorter)
 	float fingerWidth = 0.06 * upperArmWidth; // Thicker fingers
 	float fingerLength = 0.05 * upperArmLength; // Shorter length for fingers
 
@@ -752,65 +731,33 @@ void drawLeftArm()
 
 void drawRightArm()
 {
-	// Set material properties for the arm (green)
-	glMaterialfv(GL_FRONT, GL_AMBIENT, green_mat_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, green_mat_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
-
+	// Set material properties for the arm
+	glMaterialfv(GL_FRONT, GL_AMBIENT, robotArm_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, robotArm_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, robotArm_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, robotArm_mat_shininess);
 
 	glPushMatrix();
 
 	// Adjust translation to mirror the left arm, move it up and forward slightly
-	glTranslatef(-(0.5 * robotBodyWidth + 0.5 * upperArmWidth), 0.3 * robotBodyLength, 0.2 * robotBodyDepth); // Adjust Y-value for correct height
-
+	glTranslatef(-(0.5 * robotBodyWidth + 0.5 * upperArmWidth), 0.2 * robotBodyLength, 0.2 * robotBodyDepth); // Moved forward slightly on the Z-axis
 	glRotatef(-45.0, 1.0, 0.0, 0.0); // Tilt arm forward
 
-	// Draw upper arm (green part)
+	// Draw the arm (upper arm)
 	glPushMatrix();
-	glScalef(upperArmWidth, 0.6 * upperArmLength, upperArmWidth); // Upper part is shorter
+	glScalef(upperArmWidth, upperArmLength, upperArmWidth);
 	glutSolidCube(1.0);
 	glPopMatrix();
 
-	// Add the brown elbow joint
+	// Now handle the cannon attached to the arm
+	glMaterialfv(GL_FRONT, GL_AMBIENT, gun_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, gun_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, gun_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, gun_mat_shininess);
+
+	// Position the cannon at the end of the arm
 	glPushMatrix();
-	glMaterialfv(GL_FRONT, GL_AMBIENT, dark_grey_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, dark_grey_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, dark_grey_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, dark_grey_shininess);
-
-	// Position and scale the elbow
-	glTranslatef(0.0, -0.5 * 0.6 * upperArmLength, 0.0); // Position the elbow under the upper arm
-	glScalef(1.2 * upperArmWidth, 0.1 * upperArmLength, 1.2 * upperArmWidth); // Slightly larger elbow joint
-	glutSolidCube(1.0);  // Draw elbow
-	glPopMatrix();
-
-	// Move down for the lower arm, starting from the elbow
-	glTranslatef(0.0, -0.75 * 0.8 * upperArmLength, 1.3); // Move the lower arm further forward along Z-axis
-
-	// Apply rotation to the lower arm for an angled effect
-	glRotatef(-25.0, 1.0, 0.0, 0.0); // Rotate around the X-axis for angle
-
-	// Draw lower arm (green part)
-	glPushMatrix();
-	glMaterialfv(GL_FRONT, GL_AMBIENT, green_mat_ambient);  // Set back to green for the lower arm
-	glMaterialfv(GL_FRONT, GL_SPECULAR, green_mat_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
-
-	glScalef(upperArmWidth, 0.7 * upperArmLength, upperArmWidth); // Same size of the lower arm
-	glutSolidCube(1.0);
-	glPopMatrix();
-
-	// Now handle the cannon attached to the lower arm
-	glMaterialfv(GL_FRONT, GL_AMBIENT, dark_grey_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, dark_grey_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, dark_grey_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, dark_grey_shininess);
-
-	// Position the cannon at the end of the lower arm
-	glPushMatrix();
-	glTranslatef(0.0, -0.4 * upperArmLength - 0.4 * gunLength, 0.0);  // Position cannon directly at the lower arm's end
+	glTranslatef(0.0, -0.5 * upperArmLength - 0.5 * gunLength, 0.0);  // Attach to the end of the arm
 
 	// Apply cannon spin along its Y-axis (screw-like spin)
 	if (spinCannon) {
@@ -1163,6 +1110,7 @@ void mouse(int button, int state, int x, int y)
 
 	glutPostRedisplay();   // Trigger a window redisplay
 }
+
 
 // Mouse motion callback - use only if you want to
 void mouseMotionHandler(int xMouse, int yMouse)
