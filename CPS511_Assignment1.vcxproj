@@ -163,7 +163,6 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="QuadMesh.cpp" />
     <ClCompile Include="Robot3D.cpp" />
   </ItemGroup>
