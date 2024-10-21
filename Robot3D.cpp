@@ -1,5 +1,5 @@
 /*******************************************************************
-		   Hierarchical Multi-Part Model Example
+  Hierarchical Multi-Part Model Example
 ********************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,9 +31,28 @@ float stanchionLength = robotBodyLength;
 float stanchionRadius = 0.1 * robotBodyDepth;
 float baseWidth = 1.5 * robotBodyWidth;
 float baseLength = 0.4 * stanchionLength;
+float legAngle = 0.0f;        // Controls the angle of the leg during stepping
+bool spinCannon = false;      // Flag to control cannon spinning
+float cannonSpinAngle = 0.0f; // Angle for cannon spinning
+
+// Joint angles for walking
+float hipAngleLeft = 0.0f;  // Angle for left hip joint
+float kneeAngleLeft = 0.0f; // Angle for left knee joint
+float ankleAngleLeft = 0.0f; // Angle for left ankle joint
+float hipAngleRight = 0.0f;  // Angle for right hip joint
+float kneeAngleRight = 0.0f; // Angle for right knee joint
+float ankleAngleRight = 0.0f; // Angle for right ankle joint
+
+// Flag to control walking state
+bool walking = false;
+bool stepBackwards = false;  // Controls whether the leg is stepping forward or backward
+bool walkingForward = true;   // Track whether we're walking forward
+int selectedJoint = 0; // 0 for none, 1 for knee, 2 for hip, 3 for body
+int cameraView = 0; // 0 = default, 1 = front, 2 = side, 3 = top-down
 
 // Control Robot body rotation on base
 float robotAngle = 0.0;
+float neckAngle = 0.0f;   // Neck rotation
 
 // Control arm rotation
 float shoulderAngle = -40.0;
@@ -46,15 +65,14 @@ GLfloat robotBody_mat_specular[] = { 0.45f,0.55f,0.45f,1.0f };
 GLfloat robotBody_mat_diffuse[] = { 0.8f, 0.7f, 0.5f, 1.0f };
 GLfloat robotBody_mat_shininess[] = { 32.0F };
 
-
 GLfloat robotArm_mat_ambient[] = { 0.0215f, 0.1745f, 0.0215f, 0.55f };
 GLfloat robotArm_mat_diffuse[] = { 0.4f, 0.5f, 0.2f, 1.0f };
 GLfloat robotArm_mat_specular[] = { 0.7f, 0.6f, 0.6f, 1.0f };
 GLfloat robotArm_mat_shininess[] = { 32.0F };
 
-GLfloat gun_mat_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };   
-GLfloat gun_mat_diffuse[] = { 0.1f, 0.1f, 0.1f, 0.01f };   
-GLfloat gun_mat_specular[] = { 0.5f, 0.5f, 0.5f, 1.0f };  
+GLfloat gun_mat_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+GLfloat gun_mat_diffuse[] = { 0.1f, 0.1f, 0.1f, 0.01f };
+GLfloat gun_mat_specular[] = { 0.5f, 0.5f, 0.5f, 1.0f };
 GLfloat gun_mat_shininess[] = { 100.0F };
 
 GLfloat robotLowerBody_mat_ambient[] = { 0.25f, 0.25f, 0.25f, 1.0f };
@@ -88,7 +106,6 @@ GLfloat light_position1[] = { 4.0F, 8.0F, 8.0F, 1.0F };
 GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
 GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
 GLfloat light_ambient[] = { 0.2F, 0.2F, 0.2F, 1.0F };
-
 
 // Mouse button
 int currentButton;
@@ -148,7 +165,7 @@ int main(int argc, char** argv)
 }
 
 
-// Set up OpenGL. For viewport and projection setup see reshape(). 
+// Set up OpenGL. For viewport and projection setup see reshape().
 void initOpenGL(int w, int h)
 {
 	// Set up and enable lighting
@@ -168,10 +185,10 @@ void initOpenGL(int w, int h)
 
 	// Other OpenGL setup
 	glEnable(GL_DEPTH_TEST);   // Remove hidded surfaces
-	glShadeModel(GL_SMOOTH);   // Use smooth shading, makes boundaries between polygons harder to see 
+	glShadeModel(GL_SMOOTH);   // Use smooth shading, makes boundaries between polygons harder to see
 	glClearColor(0.4F, 0.4F, 0.4F, 0.0F);  // Color and depth for glClear
 	glClearDepth(1.0f);
-	glEnable(GL_NORMALIZE);    // Renormalize normal vectors 
+	glEnable(GL_NORMALIZE);    // Renormalize normal vectors
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);   // Nicer perspective
 
 	glMatrixMode(GL_MODELVIEW);
@@ -194,23 +211,28 @@ void initOpenGL(int w, int h)
 
 }
 
-
-// Callback, called whenever GLUT determines that the window should be redisplayed
-// or glutPostRedisplay() has been called.
 void display(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	glLoadIdentity();
-	// Create Viewing Matrix V
-	// Set up the camera at position (0, 6, 22) looking at the origin, up along positive y axis
-	gluLookAt(35.0, 20.0, 35.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+
+	// Change camera position based on selected view
+	switch (cameraView) {
+	case 0: // Default (isometric view)
+		gluLookAt(35.0, 20.0, 35.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+		break;
+	case 1: // Front view
+		gluLookAt(0.0, 15.0, 50.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+		break;
+	case 2: // Side view
+		gluLookAt(50.0, 15.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+		break;
+	case 3: // Top-down view
+		gluLookAt(0.0, 50.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+		break;
+	}
 
 	// Draw Robot
-
-	// Apply modelling transformations M to move robot
-	// Current transformation matrix is set to IV, where I is identity matrix
-	// CTM = IV
 	drawRobot();
 
 	// Draw ground
@@ -225,7 +247,7 @@ void display(void)
 void drawRobot()
 {
 	glPushMatrix();
-	// spin robot on base. 
+	// spin robot on base.
 	glRotatef(robotAngle, 0.0, 1.0, 0.0);
 
 	drawBody();
@@ -288,153 +310,288 @@ void drawBody()
 
 void drawHead()
 {
-	// Set robot material properties for the head
-	glMaterialfv(GL_FRONT, GL_AMBIENT, robotBody_mat_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, robotBody_mat_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, robotBody_mat_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, robotBody_mat_shininess);
+	// Set robot material properties for the head (white part)
+	GLfloat white_ambient[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat white_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat white_specular[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	GLfloat white_shininess[] = { 50.0f };
+
+	// Darker grey for the grey parts
+	GLfloat dark_grey_ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+	GLfloat dark_grey_diffuse[] = { 0.2f, 0.2f, 0.2f, 0.1f };
+	GLfloat dark_grey_specular[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+	GLfloat dark_grey_shininess[] = { 50.0f };
+
+	GLfloat blue_ambient[] = { 0.0f, 0.0f, 1.0f, 1.0f };
+	GLfloat blue_diffuse[] = { 0.0f, 0.0f, 1.0f, 1.0f };
+	GLfloat blue_specular[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+	GLfloat blue_shininess[] = { 30.0f };
 
 	glPushMatrix();
-	// Position head with respect to parent (body)
-	glTranslatef(0, 0.5 * robotBodyLength + 1.0 * headLength, 0); // Move head even higher
+	// Apply neck rotation
+	glRotatef(neckAngle, 0.0, 1.0, 0.0);  // Rotate neck along Y-axis
+	glTranslatef(0, 0.5 * robotBodyLength + 1.0 * headLength, 0); // Move head above the body
 
-	// Build the head
+	// Draw the head (white part)
 	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, white_ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, white_diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, white_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, white_shininess);
+
 	glScalef(0.4 * robotBodyWidth, 0.4 * robotBodyWidth, 0.4 * robotBodyWidth);
 	glutSolidCube(1.0);
 	glPopMatrix();
 
+	// Draw the green sides
+	GLfloat green_ambient[] = { 0.0, 0.5, 0.0, 1.0 };
+	GLfloat green_diffuse[] = { 0.0, 0.6, 0.0, 1.0 };
+	GLfloat green_specular[] = { 0.1, 0.1, 0.1, 1.0 };
+	GLfloat green_shininess[] = { 30.0 };
+
+	glMaterialfv(GL_FRONT, GL_AMBIENT, green_ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, green_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, green_shininess);
+
+	// Draw left side of the head
+	glPushMatrix();
+	glTranslatef(-0.2 * robotBodyWidth, 0, 0);  // Move to left
+	glScalef(0.01 * robotBodyWidth, 0.4 * robotBodyWidth, 0.4 * robotBodyWidth);
+	glutSolidCube(1.0);
 	glPopMatrix();
+
+	// Draw right side of the head
+	glPushMatrix();
+	glTranslatef(0.2 * robotBodyWidth, 0, 0);  // Move to right
+	glScalef(0.01 * robotBodyWidth, 0.4 * robotBodyWidth, 0.4 * robotBodyWidth);
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Grey stripe positioned just behind the blue and in front of the white, move very slightly down
+	glMaterialfv(GL_FRONT, GL_AMBIENT, dark_grey_ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, dark_grey_diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, dark_grey_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, dark_grey_shininess);
+
+	// Move the front grey part very slightly down
+	glPushMatrix();
+	glTranslatef(0.0, 0.06 * robotBodyWidth, 0.20 * robotBodyWidth);  // Very slight downward adjustment
+	glScalef(0.12 * robotBodyWidth, 0.3 * robotBodyWidth, 0.03 * robotBodyWidth);  // Taller and wider
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Add grey part to the top of the head
+	glPushMatrix();
+	glTranslatef(0.0, 0.2 * robotBodyWidth, 0.01 * robotBodyWidth);  // Small forward adjustment
+	glScalef(0.12 * robotBodyWidth, 0.02 * robotBodyWidth, 0.42 * robotBodyWidth);  // Long and thin grey stripe on top
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Blue eye (upright visor-like stripe)
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, blue_ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, blue_diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, blue_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, blue_shininess);
+
+	// Position the blue visor/eye on the front
+	glTranslatef(0.0, 0.1 * robotBodyWidth, 0.22 * robotBodyWidth);  // Position it on the front
+	glScalef(0.05 * robotBodyWidth, 0.2 * robotBodyWidth, 0.02 * robotBodyWidth);  // Flip dimensions to make it upright
+	glutSolidCube(1.0); // Blue eye
+	glPopMatrix();
+
+	glPopMatrix();  // End head drawing
 }
+
 
 void drawLowerBody()
 {
 	// Left leg
 	glPushMatrix();
-	// Move the leg lower to connect better to the body but slightly higher to avoid going into the ground
-	glTranslatef(0.5 * robotBodyWidth, -0.7 * robotBodyLength, 0.0); // Move the leg up slightly to avoid clipping with the ground
+	// Move the leg lower to connect better to the body
+	glTranslatef(0.5 * robotBodyWidth, -0.7 * robotBodyLength, 0.0); // Adjust leg height
 
-	// First (upper) part of the leg - beige segment
+	// Hip rotation
+	glRotatef(hipAngleLeft, 1.0, 0.0, 0.0); // Rotate hip
+
+	// Upper leg segment - beige
 	glPushMatrix();
 	glMaterialfv(GL_FRONT, GL_AMBIENT, beige_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, beige_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, beige_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, beige_mat_shininess);
 
-	// Rotate forward to create the first angle in the zig-zag (front-to-back)
-	glRotatef(15, 1.0, 0.0, 0.0); // Rotate around the X-axis for front-to-back zig-zag effect
-	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth); // Make the beige part longer and move lower
+	// Zig-zag rotation for upper leg
+	glRotatef(15, 1.0, 0.0, 0.0);
+	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
-	glPopMatrix();
+	glPopMatrix(); // End upper leg segment
 
-	// First (upper) green part of the leg
-	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0); // Move down for the next segment
+	// Move down for knee
+	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
+	// Knee rotation
+	glRotatef(kneeAngleLeft, 1.0, 0.0, 0.0); // Rotate knee
+
+	// Lower leg segment - green
 	glPushMatrix();
 	glMaterialfv(GL_FRONT, GL_AMBIENT, green_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, green_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
 
-	// Rotate backward for the next zig-zag angle
-	glRotatef(-15, 1.0, 0.0, 0.0); // Rotate in the opposite direction around the X-axis
-	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth); // Increase the green part length to match beige
+	glRotatef(-15, 1.0, 0.0, 0.0); // Rotate to maintain zig-zag
+	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
-	glPopMatrix();
+	glPopMatrix(); // End lower leg segment
 
-	// Second (lower) green part of the leg
-	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0); // Move down for the second green segment
-	glPushMatrix();
-	glMaterialfv(GL_FRONT, GL_AMBIENT, green_mat_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, green_mat_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
+	// Move down for ankle
+	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
+	// Ankle rotation
+	glRotatef(ankleAngleLeft, 1.0, 0.0, 0.0); // Rotate ankle
 
-	// Rotate forward slightly to maintain the zig-zag pattern
-	glRotatef(15, 1.0, 0.0, 0.0); // Small rotation for final zig-zag
-	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth); // Increase the second green part length
-	glutSolidCube(1.0);
-	glPopMatrix();
-
-	// Foot (light brown)
-	glTranslatef(0.0, -0.25 * robotBodyLength, 0.0); // Move down for the foot, ensuring it's above the ground
+	// Foot segment - light brown
 	glPushMatrix();
 	glMaterialfv(GL_FRONT, GL_AMBIENT, light_brown_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, light_brown_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, light_brown_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
 
-	// Foot should now be longer front-to-back
-	glScalef(0.4 * robotBodyDepth, 0.1 * robotBodyLength, 0.6 * robotBodyWidth); // Adjust foot size: longer Z (front-to-back)
+	// Foot base
+	glPushMatrix();
+	glScalef(0.4 * robotBodyDepth, 0.1 * robotBodyLength, 0.6 * robotBodyWidth); // Foot dimensions
+	glutSolidCube(1.0);
+	glPopMatrix(); // End foot base
+
+	// Add two dents in front of the foot
+	// First front dent
+	glPushMatrix();
+	glTranslatef(-0.15 * robotBodyDepth, 0.0, 0.4 * robotBodyWidth); // Move to the front-left
+	glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
 	glutSolidCube(1.0);
 	glPopMatrix();
+
+	// Second front dent
+	glPushMatrix();
+	glTranslatef(0.15 * robotBodyDepth, 0.0, 0.4 * robotBodyWidth); // Move to the front-right
+	glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Add two dents in back of the foot
+	// First back dent
+	glPushMatrix();
+	glTranslatef(-0.15 * robotBodyDepth, 0.0, -0.4 * robotBodyWidth); // Move to the back-left
+	glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Second back dent
+	glPushMatrix();
+	glTranslatef(0.15 * robotBodyDepth, 0.0, -0.4 * robotBodyWidth); // Move to the back-right
+	glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	glPopMatrix(); // End left foot
 
 	glPopMatrix(); // End left leg
 
-	// Right leg (copy of the left leg but positioned on the other side)
+	// Right leg (similar to left leg, mirrored)
 	glPushMatrix();
-	// Move the leg lower to connect better to the body but slightly higher to avoid going into the ground
-	glTranslatef(-0.5 * robotBodyWidth, -0.7 * robotBodyLength, 0.0); // Move the leg up slightly to avoid clipping with the ground
+	// Move the leg lower to connect better to the body
+	glTranslatef(-0.5 * robotBodyWidth, -0.7 * robotBodyLength, 0.0); // Adjust leg height
 
-	// First (upper) part of the leg - beige segment
+	// Hip rotation
+	glRotatef(hipAngleRight, 1.0, 0.0, 0.0); // Rotate hip
+
+	// Upper leg segment - beige
 	glPushMatrix();
 	glMaterialfv(GL_FRONT, GL_AMBIENT, beige_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, beige_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, beige_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, beige_mat_shininess);
 
-	// Rotate forward to create the first angle in the zig-zag (front-to-back)
-	glRotatef(15, 1.0, 0.0, 0.0); // Rotate around the X-axis for front-to-back zig-zag effect
-	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth); // Make the beige part longer and move lower
+	// Zig-zag rotation for upper leg
+	glRotatef(15, 1.0, 0.0, 0.0);
+	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
-	glPopMatrix();
+	glPopMatrix(); // End upper leg segment
 
-	// First (upper) green part of the leg
-	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0); // Move down for the next segment
+	// Move down for knee
+	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
+	// Knee rotation
+	glRotatef(kneeAngleRight, 1.0, 0.0, 0.0); // Rotate knee
+
+	// Lower leg segment - green
 	glPushMatrix();
 	glMaterialfv(GL_FRONT, GL_AMBIENT, green_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, green_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
 
-	// Rotate backward for the next zig-zag angle
-	glRotatef(-15, 1.0, 0.0, 0.0); // Rotate in the opposite direction around the X-axis
-	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth); // Increase the green part length to match beige
+	glRotatef(-15, 1.0, 0.0, 0.0); // Rotate to maintain zig-zag
+	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
-	glPopMatrix();
+	glPopMatrix(); // End lower leg segment
 
-	// Second (lower) green part of the leg
-	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0); // Move down for the second green segment
-	glPushMatrix();
-	glMaterialfv(GL_FRONT, GL_AMBIENT, green_mat_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, green_mat_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
+	// Move down for ankle
+	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
+	// Ankle rotation
+	glRotatef(ankleAngleRight, 1.0, 0.0, 0.0); // Rotate ankle
 
-	// Rotate forward slightly to maintain the zig-zag pattern
-	glRotatef(15, 1.0, 0.0, 0.0); // Small rotation for final zig-zag
-	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth); // Increase the second green part length
-	glutSolidCube(1.0);
-	glPopMatrix();
-
-	// Foot (light brown)
-	glTranslatef(0.0, -0.25 * robotBodyLength, 0.0); // Move down for the foot, ensuring it's above the ground
+	// Foot segment - light brown
 	glPushMatrix();
 	glMaterialfv(GL_FRONT, GL_AMBIENT, light_brown_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, light_brown_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, light_brown_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
 
-	// Foot should now be longer front-to-back
-	glScalef(0.4 * robotBodyDepth, 0.1 * robotBodyLength, 0.6 * robotBodyWidth); // Adjust foot size: longer Z (front-to-back)
+	// Foot base
+	glPushMatrix();
+	glScalef(0.4 * robotBodyDepth, 0.1 * robotBodyLength, 0.6 * robotBodyWidth); // Foot dimensions
+	glutSolidCube(1.0);
+	glPopMatrix(); // End foot base
+
+	// Add two dents in front of the foot
+	// First front dent
+	glPushMatrix();
+	glTranslatef(-0.15 * robotBodyDepth, 0.0, 0.4 * robotBodyWidth); // Move to the front-left
+	glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
 	glutSolidCube(1.0);
 	glPopMatrix();
 
-	glPopMatrix(); // End right leg
+    // Second front dent
+    glPushMatrix();
+    glTranslatef(0.15 * robotBodyDepth, 0.0, 0.4 * robotBodyWidth); // Move to the front-right
+    glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+    // Add two dents in back of the foot
+    // First back dent
+    glPushMatrix();
+    glTranslatef(-0.15 * robotBodyDepth, 0.0, -0.4 * robotBodyWidth); // Move to the back-left
+    glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+    // Second back dent
+    glPushMatrix();
+    glTranslatef(0.15 * robotBodyDepth, 0.0, -0.4 * robotBodyWidth); // Move to the back-right
+    glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+    glPopMatrix(); // End right foot
+
+    glPopMatrix(); // End right leg
 }
 
 
 void drawLeftArm()
 {
+	// Set the material for the arm
 	glMaterialfv(GL_FRONT, GL_AMBIENT, robotArm_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, robotArm_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, robotArm_mat_diffuse);
@@ -444,17 +601,46 @@ void drawLeftArm()
 	// Position arm with respect to parent body
 	glTranslatef(0.5 * robotBodyWidth + 0.5 * upperArmWidth, 0, 0.0); // this will be done last
 
-	// build arm
+	// Build arm
 	glPushMatrix();
 	glScalef(upperArmWidth, upperArmLength, upperArmWidth);
 	glutSolidCube(1.0);
 	glPopMatrix();
 
-	glPopMatrix();
+	// Now let's add a hand at the end of the arm
+	// Use the gun material properties for the hand color
+	glMaterialfv(GL_FRONT, GL_AMBIENT, gun_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, gun_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, gun_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, gun_mat_shininess);
+
+	// Position the hand at the end of the arm
+	glPushMatrix();
+	glTranslatef(0.0, -0.5 * upperArmLength - 0.2, 0.0);  // Attach to the end of the arm
+	glScalef(0.5 * upperArmWidth, 0.3 * upperArmLength, 0.5 * upperArmWidth);  // Adjust hand size
+	glutSolidCube(1.0);  // Hand
+
+	// Now we add the 5 fingers (thicker)
+	float fingerWidth = 0.06 * upperArmWidth; // Thicker fingers
+	float fingerLength = 0.1 * upperArmLength; // Shorter length for fingers
+
+	// Draw 5 fingers
+	for (int i = -2; i <= 2; i++) {
+		glPushMatrix();
+		glTranslatef(i * (0.12 * upperArmWidth), -0.3 * (0.3 * upperArmLength), 0.0);  // Move fingers up and space them evenly
+		glScalef(fingerWidth, fingerLength, fingerWidth);  // Scale fingers to thicker size
+		glutSolidCube(1.0);
+		glPopMatrix();
+	}
+
+	glPopMatrix();  // End of hand
+	glPopMatrix();  // End of arm
 }
+
 
 void drawRightArm()
 {
+	// Set material properties for the arm
 	glMaterialfv(GL_FRONT, GL_AMBIENT, robotArm_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, robotArm_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, robotArm_mat_diffuse);
@@ -462,81 +648,66 @@ void drawRightArm()
 
 	glPushMatrix();
 
-	// Rotate arm at shoulder
-	glTranslatef(-(0.5 * robotBodyWidth + 0.5 * upperArmWidth), 0.5 * upperArmLength, 0.0);
-	glRotatef(shoulderAngle, 1.0, 0.0, 0.0);
-	glTranslatef((0.5 * robotBodyWidth + 0.5 * upperArmWidth), -0.5 * upperArmLength, 0.0);
+	// Adjust translation to mirror the left arm, move it up and forward slightly
+	glTranslatef(-(0.5 * robotBodyWidth + 0.5 * upperArmWidth), 0.2 * robotBodyLength, 0.2 * robotBodyDepth); // Moved forward slightly on the Z-axis
+	glRotatef(-45.0, 1.0, 0.0, 0.0); // Tilt arm forward
 
-	// Position arm and gun with respect to parent body
-	glTranslatef(-(0.5 * robotBodyWidth + 0.5 * upperArmWidth), 0, 0.0);
-
-	// build arm
+	// Draw the arm (upper arm)
 	glPushMatrix();
 	glScalef(upperArmWidth, upperArmLength, upperArmWidth);
 	glutSolidCube(1.0);
 	glPopMatrix();
 
-	// Gun
+	// Now handle the cannon attached to the arm
 	glMaterialfv(GL_FRONT, GL_AMBIENT, gun_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, gun_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, gun_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, gun_mat_shininess);
 
+	// Position the cannon at the end of the arm
 	glPushMatrix();
-	// rotate gun
-	glTranslatef(-(0.5 * robotBodyWidth + 0.5 * upperArmWidth), -(0.5 * upperArmLength), 0.0);
-	glRotatef(gunAngle, 1.0, 0.0, 0.0);
-	glTranslatef((0.5 * robotBodyWidth + 0.5 * upperArmWidth), (0.5 * upperArmLength), 0.0);
+	glTranslatef(0.0, -0.5 * upperArmLength - 0.5 * gunLength, 0.0);  // Attach to the end of the arm
 
-	// Position gun with respect to parent arm 
-	glTranslatef(0, -(0.5 * upperArmLength + 0.5 * gunLength), 0.0);
+	// Apply cannon spin along its Y-axis (screw-like spin)
+	if (spinCannon) {
+		glRotatef(cannonSpinAngle, 0.0, 1.0, 0.0);  // Spin along the Y-axis
+	}
 
-	// build simplified gun body (cube)
+	// Draw the gun (cannon body)
 	glPushMatrix();
 	glScalef(gunWidth, gunLength, gunDepth);
-	glutSolidCube(1.0);
+	glutSolidCube(1.0);  // Cannon body
 	glPopMatrix();
 
-	// build simplified gun barrel (cylinder)
+	// Draw the cannon barrel (cylinder)
 	glPushMatrix();
-	// Position the cylinder in front of the cube
-	glTranslatef(0.0, -0.5 * gunLength + 0.5, 0.0);
-	glRotatef(90.0, 1.0, 0.0, 0.0); // Align the cylinder with the correct axis
+	glTranslatef(0.0, -0.5 * gunLength, 0.0);  // Move to the end of the cannon
+	glRotatef(90.0, 1.0, 0.0, 0.0);  // Align the cylinder properly
 	GLUquadric* quad = gluNewQuadric();
-	gluCylinder(quad, 1.5, 1.5, 5.0, 40, 20); // A long, thin cylinder for the barrel
+	gluCylinder(quad, 1.5, 1.5, 5.0, 40, 20);  // Barrel
 	glPopMatrix();
 
-	// Add the red/orange rectangle inside the cylinder
+	// Draw the orange projectile inside the cannon
 	glPushMatrix();
-	// Set the color for the red/orange rectangle
-	GLfloat red_orange_ambient[] = { 0.8f, 0.2f, 0.0f, 1.0f };
-	GLfloat red_orange_diffuse[] = { 0.9f, 0.3f, 0.1f, 1.0f };
-	GLfloat red_orange_specular[] = { 0.8f, 0.2f, 0.1f, 1.0f };
-	GLfloat red_orange_shininess[] = { 32.0F };
-
 	glMaterialfv(GL_FRONT, GL_AMBIENT, red_orange_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, red_orange_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, red_orange_diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, red_orange_specular);
 	glMaterialfv(GL_FRONT, GL_SHININESS, red_orange_shininess);
-
-	// Position and size the red/orange rectangle inside the cylinder
-	glTranslatef(0.0, -2.5 * gunLength, 0.0); // Adjust position inside cylinder
-	glScalef(gunWidth * 0.5, gunLength * 0.1, gunDepth * 0.5); // Size the rectangle
-	glutSolidCube(1.0); // Draw the red/orange rectangle
+	glTranslatef(0.0, -2.5 * gunLength, 0.0);  // Inside the cannon
+	glScalef(gunWidth * 0.5, gunLength * 0.1, gunDepth * 0.5);
+	glutSolidCube(1.0);  // The orange projectile
 	glPopMatrix();
 
-	// Add a magazine to the gun
+	// Draw the magazine under the cannon
 	glPushMatrix();
-	// Position the magazine below the gun body
-	glTranslatef(0.0, -gunLength - 1.0, 0.0); // Move below the gun
-	glScalef(gunWidth * 0.8, gunLength * 0.4, gunDepth * 0.8); // Adjust size of the magazine
+	glTranslatef(0.0, -gunLength - 1.0, 0.0);  // Position magazine below the cannon
+	glScalef(gunWidth * 0.8, gunLength * 0.4, gunDepth * 0.8);  // Scale the magazine
 	glutSolidCube(1.0);
 	glPopMatrix();
 
-	glPopMatrix();
-	glPopMatrix();
+	glPopMatrix();  // End cannon drawing
+	glPopMatrix();  // End arm drawing
 }
-
 
 void reshape(int w, int h)
 {
@@ -556,43 +727,114 @@ void reshape(int w, int h)
 
 bool stop = false;
 
-// Callback, handles input from the keyboard, non-arrow keys
+void stepAnimation(int value)
+{
+	if (walking) {
+		// Move left leg forward, right leg backward
+		if (walkingForward) {
+			// Move left leg forward
+			if (hipAngleLeft < 30.0f) {
+				hipAngleLeft += 2.0f;   // Raise left hip
+				kneeAngleLeft -= 2.0f;  // Bend left knee
+				ankleAngleLeft += 1.0f; // Raise left ankle
+			}
+			else {
+				walkingForward = false;  // Switch to moving backward
+			}
+
+			// Move right leg backward
+			if (hipAngleRight > -30.0f) {
+				hipAngleRight -= 2.0f;   // Lower right hip
+				kneeAngleRight += 2.0f;  // Straighten right knee
+				ankleAngleRight -= 1.0f; // Lower right ankle
+			}
+		}
+		else { // Move legs in reverse direction (reset position)
+			// Move left leg backward
+			if (hipAngleLeft > 0.0f) {
+				hipAngleLeft -= 2.0f;   // Lower left hip
+				kneeAngleLeft += 2.0f;  // Straighten left knee
+				ankleAngleLeft -= 1.0f; // Lower left ankle
+			}
+			else {
+				walkingForward = true;   // Switch to moving forward
+			}
+
+			// Move right leg forward
+			if (hipAngleRight < 0.0f) {
+				hipAngleRight += 2.0f;   // Raise right hip
+				kneeAngleRight -= 2.0f;  // Bend right knee
+				ankleAngleRight += 1.0f; // Raise right ankle
+			}
+		}
+
+		glutPostRedisplay();  // Trigger redraw
+
+		// Continue the walking animation if walking is still active
+		if (walking) {
+			glutTimerFunc(10, stepAnimation, 0);  // Continue walking
+		}
+	}
+}
+
+void cannonAnimation(int value)
+{
+	if (spinCannon)
+	{
+		cannonSpinAngle += 5.0f;  // Increment the cannon spin angle to rotate the cannon
+		if (cannonSpinAngle > 360.0f) {
+			cannonSpinAngle -= 360.0f;  // Reset the angle after a full rotation
+		}
+		glutPostRedisplay();  // Redraw to show the updated cannon position
+		glutTimerFunc(10, cannonAnimation, 0);  // Continue spinning the cannon
+	}
+}
+
 void keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-	case 't':
-
+	case 'k':  // Control knees
+		selectedJoint = 1;
 		break;
-	case 'r':
-		robotAngle += 2.0;
+	case 'h':  // Control hips
+		selectedJoint = 2;
 		break;
-	case 'R':
-		robotAngle -= 2.0;
+	case 'n':  // Control neck (head rotation)
+		selectedJoint = 3;
 		break;
-	case 'a':
-		shoulderAngle += 2.0;
+	case 'b':  // Select body rotation (selectedJoint = 4)
+		selectedJoint = 4;
 		break;
-	case 'A':
-		shoulderAngle -= 2.0;
+	case '1':  // Default view (isometric)
+		cameraView = 0;
 		break;
-	case 'g':
-		gunAngle += 2.0;
+	case '2':  // Front view
+		cameraView = 1;
 		break;
-	case 'G':
-		gunAngle -= 2.0;
+	case '3':  // Side view
+		cameraView = 2;
 		break;
-	case 's':
-		glutTimerFunc(10, animationHandler, 0);
+	case '4':  // Top-down view
+		cameraView = 3;
 		break;
-	case 'S':
-		stop = true;
+	case 'w':  // Start/Stop walking
+		walking = !walking;
+		if (walking) {
+			glutTimerFunc(10, stepAnimation, 0);  // Start walking animation
+		}
+		break;
+	case 'c':  // Toggle cannon spinning
+		spinCannon = !spinCannon;
+		if (spinCannon) {
+			glutTimerFunc(10, cannonAnimation, 0);
+		}
+		break;
+	default:
 		break;
 	}
-
-	glutPostRedisplay();   // Trigger a window redisplay
+	glutPostRedisplay();
 }
-
 
 void animationHandler(int param)
 {
@@ -605,25 +847,80 @@ void animationHandler(int param)
 }
 
 
-
-// Callback, handles input from the keyboard, function and arrow keys
 void functionKeys(int key, int x, int y)
 {
-	// Help key
-	if (key == GLUT_KEY_F1)
+	switch (key)
 	{
+	case GLUT_KEY_LEFT:
+		if (selectedJoint == 1) {
+			kneeAngleLeft += 2.0f;  // Rotate left knee
+		}
+		else if (selectedJoint == 2) {
+			hipAngleLeft += 2.0f;   // Rotate left hip
+		}
+		else if (selectedJoint == 3) {
+			neckAngle += 2.0f;     // Rotate neck (left turn)
+		}
+		else if (selectedJoint == 4) {
+			robotAngle += 2.0f;    // Rotate body (left)
+			if (robotAngle > 360.0f) {
+				robotAngle -= 360.0f;
+			}
+		}
+		break;
 
+	case GLUT_KEY_RIGHT:
+		if (selectedJoint == 1) {
+			kneeAngleLeft -= 2.0f;  // Rotate left knee in the opposite direction
+		}
+		else if (selectedJoint == 2) {
+			hipAngleLeft -= 2.0f;   // Rotate left hip in the opposite direction
+		}
+		else if (selectedJoint == 3) {
+			neckAngle -= 2.0f;     // Rotate neck (right turn)
+		}
+		else if (selectedJoint == 4) {
+			robotAngle -= 2.0f;    // Rotate body (right)
+			if (robotAngle < -360.0f) {
+				robotAngle += 360.0f;
+			}
+		}
+		break;
+
+	case GLUT_KEY_UP:
+		if (selectedJoint == 1) {
+			kneeAngleRight += 2.0f;  // Rotate right knee
+		}
+		else if (selectedJoint == 2) {
+			hipAngleRight += 2.0f;   // Rotate right hip
+		}
+		else if (selectedJoint == 3) {
+			neckAngle += 2.0f;     // Rotate neck (upward turn - simulating look up)
+		}
+		else if (selectedJoint == 4) {
+			robotAngle += 2.0f;    // Optional: You can add more functionality for the body here
+		}
+		break;
+
+	case GLUT_KEY_DOWN:
+		if (selectedJoint == 1) {
+			kneeAngleRight -= 2.0f;  // Rotate right knee in the opposite direction
+		}
+		else if (selectedJoint == 2) {
+			hipAngleRight -= 2.0f;   // Rotate right hip in the opposite direction
+		}
+		else if (selectedJoint == 3) {
+			neckAngle -= 2.0f;     // Rotate neck (downward turn - simulating look down)
+		}
+		else if (selectedJoint == 4) {
+			robotAngle -= 2.0f;    // Optional: You can add more functionality for the body here
+		}
+		break;
 	}
-	// Do transformations with arrow keys
-	//else if (...)   // GLUT_KEY_DOWN, GLUT_KEY_UP, GLUT_KEY_RIGHT, GLUT_KEY_LEFT
-	//{
-	//}
-
-	glutPostRedisplay();   // Trigger a window redisplay
+	glutPostRedisplay();   // Trigger redraw to apply changes
 }
 
-
-// Mouse button callback - use only if you want to 
+// Mouse button callback - use only if you want to
 void mouse(int button, int state, int x, int y)
 {
 	currentButton = button;
@@ -651,7 +948,7 @@ void mouse(int button, int state, int x, int y)
 }
 
 
-// Mouse motion callback - use only if you want to 
+// Mouse motion callback - use only if you want to
 void mouseMotionHandler(int xMouse, int yMouse)
 {
 	if (currentButton == GLUT_LEFT_BUTTON)
@@ -661,4 +958,3 @@ void mouseMotionHandler(int xMouse, int yMouse)
 
 	glutPostRedisplay();   // Trigger a window redisplay
 }
-
