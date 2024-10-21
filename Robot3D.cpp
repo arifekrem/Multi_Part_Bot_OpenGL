@@ -301,24 +301,99 @@ void drawBody()
 
 void drawHead()
 {
-	// Set robot material properties for the head
-	glMaterialfv(GL_FRONT, GL_AMBIENT, robotBody_mat_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, robotBody_mat_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, robotBody_mat_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, robotBody_mat_shininess);
+	// Set robot material properties for the head (white part)
+	GLfloat white_ambient[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat white_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat white_specular[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	GLfloat white_shininess[] = { 50.0f };
+
+	// Darker grey for the grey parts
+	GLfloat dark_grey_ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+	GLfloat dark_grey_diffuse[] = { 0.2f, 0.2f, 0.2f, 0.1f };
+	GLfloat dark_grey_specular[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+	GLfloat dark_grey_shininess[] = { 50.0f };
+
+	// Blue for the visor
+	GLfloat blue_ambient[] = { 0.0f, 0.0f, 1.0f, 1.0f };
+	GLfloat blue_diffuse[] = { 0.0f, 0.0f, 1.0f, 1.0f };
+	GLfloat blue_specular[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+	GLfloat blue_shininess[] = { 30.0f };
 
 	glPushMatrix();
 	// Apply neck rotation
 	glRotatef(neckAngle, 0.0, 1.0, 0.0);  // Rotate neck along Y-axis
 	glTranslatef(0, 0.5 * robotBodyLength + 1.0 * headLength, 0); // Move head above the body
 
-	// Build the head
+	// Draw the head (white part)
 	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, white_ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, white_diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, white_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, white_shininess);
+
 	glScalef(0.4 * robotBodyWidth, 0.4 * robotBodyWidth, 0.4 * robotBodyWidth);
 	glutSolidCube(1.0);
 	glPopMatrix();
 
+	// Draw the green sides
+	GLfloat green_ambient[] = { 0.0, 0.5, 0.0, 1.0 };
+	GLfloat green_diffuse[] = { 0.0, 0.6, 0.0, 1.0 };
+	GLfloat green_specular[] = { 0.1, 0.1, 0.1, 1.0 };
+	GLfloat green_shininess[] = { 30.0 };
+
+	glMaterialfv(GL_FRONT, GL_AMBIENT, green_ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, green_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, green_shininess);
+
+	// Draw left side of the head
+	glPushMatrix();
+	glTranslatef(-0.2 * robotBodyWidth, 0, 0);  // Move to left
+	glScalef(0.01 * robotBodyWidth, 0.4 * robotBodyWidth, 0.4 * robotBodyWidth);
+	glutSolidCube(1.0);
 	glPopMatrix();
+
+	// Draw right side of the head
+	glPushMatrix();
+	glTranslatef(0.2 * robotBodyWidth, 0, 0);  // Move to right
+	glScalef(0.01 * robotBodyWidth, 0.4 * robotBodyWidth, 0.4 * robotBodyWidth);
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Grey stripe positioned just behind the blue and in front of the white, move very slightly down
+	glMaterialfv(GL_FRONT, GL_AMBIENT, dark_grey_ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, dark_grey_diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, dark_grey_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, dark_grey_shininess);
+
+	// Move the front grey part very slightly down
+	glPushMatrix();
+	glTranslatef(0.0, 0.06 * robotBodyWidth, 0.20 * robotBodyWidth);  // Very slight downward adjustment
+	glScalef(0.12 * robotBodyWidth, 0.3 * robotBodyWidth, 0.03 * robotBodyWidth);  // Taller and wider
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Add grey part to the top of the head
+	glPushMatrix();
+	glTranslatef(0.0, 0.2 * robotBodyWidth, 0.01 * robotBodyWidth);  // Small forward adjustment
+	glScalef(0.12 * robotBodyWidth, 0.02 * robotBodyWidth, 0.42 * robotBodyWidth);  // Long and thin grey stripe on top
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Blue eye (upright visor-like stripe)
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, blue_ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, blue_diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, blue_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, blue_shininess);
+
+	// Position the blue visor/eye on the front
+	glTranslatef(0.0, 0.1 * robotBodyWidth, 0.22 * robotBodyWidth);  // Position it on the front
+	glScalef(0.05 * robotBodyWidth, 0.2 * robotBodyWidth, 0.02 * robotBodyWidth);  // Flip dimensions to make it upright
+	glutSolidCube(1.0); // Blue eye
+	glPopMatrix();
+
+	glPopMatrix();  // End head drawing
 }
 
 void drawLowerBody()
@@ -399,9 +474,43 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, light_brown_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
 
+	// Foot base
+	glPushMatrix();
 	glScalef(0.4 * robotBodyDepth, 0.1 * robotBodyLength, 0.6 * robotBodyWidth); // Foot dimensions
 	glutSolidCube(1.0);
-	glPopMatrix(); // End foot
+	glPopMatrix(); // End foot base
+
+	// Add two dents in front of the foot
+	// First front dent
+	glPushMatrix();
+	glTranslatef(-0.15 * robotBodyDepth, 0.0, 0.4 * robotBodyWidth); // Move to the front-left
+	glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Second front dent
+	glPushMatrix();
+	glTranslatef(0.15 * robotBodyDepth, 0.0, 0.4 * robotBodyWidth); // Move to the front-right
+	glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Add two dents in back of the foot
+	// First back dent
+	glPushMatrix();
+	glTranslatef(-0.15 * robotBodyDepth, 0.0, -0.4 * robotBodyWidth); // Move to the back-left
+	glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Second back dent
+	glPushMatrix();
+	glTranslatef(0.15 * robotBodyDepth, 0.0, -0.4 * robotBodyWidth); // Move to the back-right
+	glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	glPopMatrix(); // End left foot
 
 	glPopMatrix(); // End left leg
 
@@ -467,15 +576,49 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, light_brown_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
 
+	// Foot base
+	glPushMatrix();
 	glScalef(0.4 * robotBodyDepth, 0.1 * robotBodyLength, 0.6 * robotBodyWidth); // Foot dimensions
 	glutSolidCube(1.0);
-	glPopMatrix(); // End foot
+	glPopMatrix(); // End foot base
+
+	// Add two dents in front of the foot
+	// First front dent
+	glPushMatrix();
+	glTranslatef(-0.15 * robotBodyDepth, 0.0, 0.4 * robotBodyWidth); // Move to the front-left
+	glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Second front dent
+	glPushMatrix();
+	glTranslatef(0.15 * robotBodyDepth, 0.0, 0.4 * robotBodyWidth); // Move to the front-right
+	glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Add two dents in back of the foot
+	// First back dent
+	glPushMatrix();
+	glTranslatef(-0.15 * robotBodyDepth, 0.0, -0.4 * robotBodyWidth); // Move to the back-left
+	glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Second back dent
+	glPushMatrix();
+	glTranslatef(0.15 * robotBodyDepth, 0.0, -0.4 * robotBodyWidth); // Move to the back-right
+	glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	glPopMatrix(); // End right foot
 
 	glPopMatrix(); // End right leg
 }
 
-void drawLeftArm()
-{
+void drawLeftArm() {
+	// Set the material for the arm
 	glMaterialfv(GL_FRONT, GL_AMBIENT, robotArm_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, robotArm_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, robotArm_mat_diffuse);
@@ -483,19 +626,41 @@ void drawLeftArm()
 
 	glPushMatrix();
 	// Position arm with respect to parent body
-	glTranslatef(0.5 * robotBodyWidth + 0.5 * upperArmWidth, 0, 0.0); // this will be done last
+	glTranslatef(0.5 * robotBodyWidth + 0.5 * upperArmWidth, 0, 0.0);
 
-	// build arm
+	// Draw upper arm
 	glPushMatrix();
 	glScalef(upperArmWidth, upperArmLength, upperArmWidth);
 	glutSolidCube(1.0);
 	glPopMatrix();
 
-	glPopMatrix();
+	// Add hand
+	glMaterialfv(GL_FRONT, GL_AMBIENT, gun_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, gun_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, gun_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, gun_mat_shininess);
+
+	glPushMatrix();
+	glTranslatef(0.0, -0.5 * upperArmLength - 0.2, 0.0); // Position hand at end of arm
+	glScalef(0.5 * upperArmWidth, 0.3 * upperArmLength, 0.5 * upperArmWidth);
+	glutSolidCube(1.0); // Draw hand
+
+	// Draw fingers (shorter and thicker)
+	float fingerWidth = 0.06 * upperArmWidth;
+	float fingerLength = 0.1 * upperArmLength;
+	for (int i = -2; i <= 2; i++) {
+		glPushMatrix();
+		glTranslatef(i * (0.12 * upperArmWidth), -0.3 * (0.3 * upperArmLength), 0.0); // Space fingers
+		glScalef(fingerWidth, fingerLength, fingerWidth); // Scale fingers
+		glutSolidCube(1.0);
+		glPopMatrix();
+	}
+
+	glPopMatrix(); // End hand
+	glPopMatrix(); // End arm
 }
 
-void drawRightArm()
-{
+void drawRightArm() {
 	// Set material properties for the arm
 	glMaterialfv(GL_FRONT, GL_AMBIENT, robotArm_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, robotArm_mat_specular);
@@ -504,65 +669,57 @@ void drawRightArm()
 
 	glPushMatrix();
 
-	// Adjust translation to mirror the left arm, move it up and forward slightly
-	glTranslatef(-(0.5 * robotBodyWidth + 0.5 * upperArmWidth), 0.2 * robotBodyLength, 0.2 * robotBodyDepth); // Moved forward slightly on the Z-axis
-	glRotatef(-45.0, 1.0, 0.0, 0.0); // Tilt arm forward
+	// Position arm with respect to parent body
+	glTranslatef(-(0.5 * robotBodyWidth + 0.5 * upperArmWidth), 0.2 * robotBodyLength, 0.2 * robotBodyDepth); // Adjust position
+	glRotatef(-45.0, 1.0, 0.0, 0.0); // Tilt arm
 
-	// Draw the arm (upper arm)
+	// Draw upper arm
 	glPushMatrix();
 	glScalef(upperArmWidth, upperArmLength, upperArmWidth);
 	glutSolidCube(1.0);
 	glPopMatrix();
 
-	// Now handle the cannon attached to the arm
+	// Draw the cannon (attach to arm)
 	glMaterialfv(GL_FRONT, GL_AMBIENT, gun_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, gun_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, gun_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, gun_mat_shininess);
 
-	// Position the cannon at the end of the arm
 	glPushMatrix();
-	glTranslatef(0.0, -0.5 * upperArmLength - 0.5 * gunLength, 0.0);  // Attach to the end of the arm
+	glTranslatef(0.0, -0.5 * upperArmLength - 0.5 * gunLength, 0.0); // Attach cannon
 
-	// Apply cannon spin along its Y-axis (screw-like spin)
+	// Spin the cannon if needed
 	if (spinCannon) {
-		glRotatef(cannonSpinAngle, 0.0, 1.0, 0.0);  // Spin along the Y-axis
+		glRotatef(cannonSpinAngle, 0.0, 1.0, 0.0); // Spin cannon
 	}
 
-	// Draw the gun (cannon body)
+	// Draw cannon body
 	glPushMatrix();
 	glScalef(gunWidth, gunLength, gunDepth);
-	glutSolidCube(1.0);  // Cannon body
+	glutSolidCube(1.0);
 	glPopMatrix();
 
-	// Draw the cannon barrel (cylinder)
+	// Draw cannon barrel
 	glPushMatrix();
-	glTranslatef(0.0, -0.5 * gunLength, 0.0);  // Move to the end of the cannon
-	glRotatef(90.0, 1.0, 0.0, 0.0);  // Align the cylinder properly
+	glTranslatef(0.0, -0.5 * gunLength, 0.0); // Barrel position
+	glRotatef(90.0, 1.0, 0.0, 0.0); // Rotate for correct alignment
 	GLUquadric* quad = gluNewQuadric();
-	gluCylinder(quad, 1.5, 1.5, 5.0, 40, 20);  // Barrel
+	gluCylinder(quad, 1.5, 1.5, 5.0, 40, 20); // Barrel cylinder
 	glPopMatrix();
 
-	// Draw the orange projectile inside the cannon
+	// Draw orange projectile inside the cannon
 	glPushMatrix();
 	glMaterialfv(GL_FRONT, GL_AMBIENT, red_orange_ambient);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, red_orange_diffuse);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, red_orange_specular);
 	glMaterialfv(GL_FRONT, GL_SHININESS, red_orange_shininess);
-	glTranslatef(0.0, -2.5 * gunLength, 0.0);  // Inside the cannon
+	glTranslatef(0.0, -2.5 * gunLength, 0.0); // Position projectile
 	glScalef(gunWidth * 0.5, gunLength * 0.1, gunDepth * 0.5);
-	glutSolidCube(1.0);  // The orange projectile
+	glutSolidCube(1.0); // Draw projectile
 	glPopMatrix();
 
-	// Draw the magazine under the cannon
-	glPushMatrix();
-	glTranslatef(0.0, -gunLength - 1.0, 0.0);  // Position magazine below the cannon
-	glScalef(gunWidth * 0.8, gunLength * 0.4, gunDepth * 0.8);  // Scale the magazine
-	glutSolidCube(1.0);
-	glPopMatrix();
-
-	glPopMatrix();  // End cannon drawing
-	glPopMatrix();  // End arm drawing
+	glPopMatrix(); // End cannon
+	glPopMatrix(); // End arm
 }
 
 void reshape(int w, int h)
