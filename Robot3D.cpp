@@ -235,14 +235,15 @@ void display(void)
 	// Draw Robot
 	drawRobot();
 
-	// Draw ground
+	// Draw ground (lowered further)
 	glPushMatrix();
-	glTranslatef(0.0, -20.0, 0.0);
+	glTranslatef(0.0, -25.0, 0.0);  // Lowered the ground to -30.0
 	groundMesh->DrawMesh(meshSize);
 	glPopMatrix();
 
 	glutSwapBuffers();   // Double buffering, swap buffers
 }
+
 
 void drawRobot()
 {
@@ -395,7 +396,6 @@ void drawHead()
 	glPopMatrix();  // End head drawing
 }
 
-
 void drawLowerBody()
 {
 	// Lower body green section (stationary part)
@@ -427,7 +427,7 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_SHININESS, beige_mat_shininess);
 
 	// Rotate and scale the upper leg
-	glRotatef(15, 1.0, 0.0, 0.0); // Slight rotation for a zig-zag pose
+	glRotatef(-15, 1.0, 0.0, 0.0); // Slight rotation for a zig-zag pose
 	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
 	glPopMatrix(); // End upper leg segment
@@ -440,7 +440,7 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
 
 	// Adjust kneecap placement (slightly forward on the Z-axis)
-	glTranslatef(0.0, -0.25 * robotBodyLength, -0.05 * robotBodyDepth);  // Move kneecap forward slightly
+	glTranslatef(0.0, -0.25 * robotBodyLength, 0.10 * robotBodyDepth);  // Move kneecap forward slightly
 	glScalef(0.25 * robotBodyWidth, 0.1 * robotBodyLength, 0.25 * robotBodyDepth);  // Scale the kneecap
 	glutSolidCube(1.0);  // Draw kneecap
 	glPopMatrix();
@@ -457,13 +457,42 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
 
-	glRotatef(-15, 1.0, 0.0, 0.0); // Rotate to maintain zig-zag pose
+	glRotatef(15, 1.0, 0.0, 0.0); // Rotate to maintain zig-zag pose
 	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
 	glPopMatrix(); // End lower leg segment
 
-	// Move down for ankle
+	// New kneecap between the two green parts
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, light_brown_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, light_brown_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, light_brown_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
+
+	// Translate to position the kneecap between the two green parts
+	glTranslatef(0.0, -0.25 * robotBodyLength, 0.0); // Adjust based on the spacing between the two green parts
+	glScalef(0.25 * robotBodyWidth, 0.1 * robotBodyLength, 0.25 * robotBodyDepth);
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Move down for the second (third part) green leg
 	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
+
+	// Second green part - same size as the previous green part
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, green_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, green_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
+
+	glRotatef(-15, 1.0, 0.0, 0.0); // Continue zig-zag pose
+	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
+	glutSolidCube(1.0);
+	glPopMatrix(); // End second green part
+
+	// Move down for ankle (adjusted to move feet up)
+	glTranslatef(0.0, -0.3 * robotBodyLength, 0.0);  // Reduced from -0.5 to -0.3 for closer connection
+
 	// Ankle rotation
 	glRotatef(ankleAngleLeft, 1.0, 0.0, 0.0); // Rotate ankle
 
@@ -529,7 +558,7 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, beige_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, beige_mat_shininess);
 
-	glRotatef(15, 1.0, 0.0, 0.0); // Zig-zag pose
+	glRotatef(-15, 1.0, 0.0, 0.0); // Zig-zag pose
 	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
 	glPopMatrix(); // End upper leg segment
@@ -542,7 +571,7 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
 
 	// Adjust kneecap placement
-	glTranslatef(0.0, -0.25 * robotBodyLength, -0.05 * robotBodyDepth);  // Move kneecap forward
+	glTranslatef(0.0, -0.25 * robotBodyLength, 0.10 * robotBodyDepth);  // Move kneecap forward
 	glScalef(0.25 * robotBodyWidth, 0.1 * robotBodyLength, 0.25 * robotBodyDepth);  // Adjust kneecap scale
 	glutSolidCube(1.0);
 	glPopMatrix();
@@ -559,13 +588,41 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
 
-	glRotatef(-15, 1.0, 0.0, 0.0); // Zig-zag rotation
+	glRotatef(15, 1.0, 0.0, 0.0); // Zig-zag rotation
 	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
 	glPopMatrix(); // End lower leg segment
 
-	// Move down for ankle
+	// New kneecap between the two green parts (right leg)
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, light_brown_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, light_brown_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, light_brown_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
+
+	glTranslatef(0.0, -0.25 * robotBodyLength, 0.0); // Adjust for kneecap position
+	glScalef(0.25 * robotBodyWidth, 0.1 * robotBodyLength, 0.25 * robotBodyDepth);
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Move down for the second green part (right leg)
 	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
+
+	// Second green part (right leg)
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, green_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, green_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
+
+	glRotatef(-15, 1.0, 0.0, 0.0); // Continue zig-zag pose
+	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
+	glutSolidCube(1.0);
+	glPopMatrix(); // End second green part
+
+	// Move down for ankle (adjusted to move feet up)
+	glTranslatef(0.0, -0.3 * robotBodyLength, 0.0);  // Reduced from -0.5 to -0.3 for closer connection
+
 	// Ankle rotation
 	glRotatef(ankleAngleRight, 1.0, 0.0, 0.0); // Rotate ankle
 
@@ -616,6 +673,7 @@ void drawLowerBody()
 
 	glPopMatrix(); // End right leg
 }
+
 
 void drawLeftArm()
 {
