@@ -246,20 +246,24 @@ void display(void)
 
 void drawRobot()
 {
-	glPushMatrix();
-	// spin robot on base.
-	glRotatef(robotAngle, 0.0, 1.0, 0.0);
+	// 1. Draw the lower body (green part and legs) separately with no rotation
+	glPushMatrix();  // Save current matrix state
+	drawLowerBody();  // Draw the lower body first without any transformations
+	glPopMatrix();  // Restore the matrix
 
-	drawBody();
-	drawHead();
-	drawLeftArm();
-	drawRightArm();
-	glPopMatrix();
+	// 2. Draw the upper body with rotation
+	glPushMatrix();  // Save current matrix state
 
-	// don't want to spin fixed base in this example
-	drawLowerBody();
+	// Rotate only the upper body parts
+	glRotatef(robotAngle, 0.0, 1.0, 0.0);  // Apply rotation for the upper body
 
-	glPopMatrix();
+	// Draw the upper body components: torso, head, arms
+	drawBody();      // Beige, black parts (upper torso)
+	drawHead();      // Head
+	drawLeftArm();   // Left arm
+	drawRightArm();  // Right arm
+
+	glPopMatrix();  // End upper body rotation, restore the matrix
 }
 
 void drawBody()
@@ -292,21 +296,8 @@ void drawBody()
 	glutSolidCube(1.0);
 	glPopMatrix();
 
-	// Bottom Part (Green, thinner and between the legs)
-	glPushMatrix();
-	// Set material properties for the green bottom part
-	glMaterialfv(GL_FRONT, GL_AMBIENT, green_mat_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, green_mat_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
-
-	// Position and scale the bottom part
-	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);  // Bottom part is at the bottom
-	glScalef(0.8 * robotBodyWidth, robotBodyLength / 3.0, 0.8 * robotBodyDepth);  // Thinner and smaller to fit between the legs
-	glutSolidCube(1.0);
-	glPopMatrix();
+	// No longer drawing the green bottom part here; it will now be drawn as part of the lower body.
 }
-
 
 void drawHead()
 {
@@ -407,13 +398,26 @@ void drawHead()
 
 void drawLowerBody()
 {
+	// Lower body green section (stationary part)
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, green_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, green_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
+
+	// Position the green section (between the legs) under the upper body but not affected by rotation
+	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);  // Move to where the green section is positioned
+	glScalef(0.8 * robotBodyWidth, robotBodyLength / 3.0, 0.8 * robotBodyDepth);  // Scale to match the body proportions
+	glutSolidCube(1.0);  // Draw the green section (stationary)
+	glPopMatrix();
+
 	// Left leg
 	glPushMatrix();
 	// Move the leg lower to connect better to the body
 	glTranslatef(0.5 * robotBodyWidth, -0.7 * robotBodyLength, 0.0); // Adjust leg height
 
-	// Hip rotation
-	glRotatef(hipAngleLeft, 1.0, 0.0, 0.0); // Rotate hip
+	// Hip rotation for walking
+	glRotatef(hipAngleLeft, 1.0, 0.0, 0.0); // Rotate hip joint
 
 	// Upper leg segment - beige
 	glPushMatrix();
@@ -422,13 +426,26 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, beige_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, beige_mat_shininess);
 
-	// Zig-zag rotation for upper leg
-	glRotatef(15, 1.0, 0.0, 0.0);
+	// Rotate and scale the upper leg
+	glRotatef(15, 1.0, 0.0, 0.0); // Slight rotation for a zig-zag pose
 	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
 	glPopMatrix(); // End upper leg segment
 
-	// Move down for knee
+	// Add kneecap before moving down for the lower leg
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, light_brown_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, light_brown_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, light_brown_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
+
+	// Adjust kneecap placement (slightly forward on the Z-axis)
+	glTranslatef(0.0, -0.25 * robotBodyLength, -0.05 * robotBodyDepth);  // Move kneecap forward slightly
+	glScalef(0.25 * robotBodyWidth, 0.1 * robotBodyLength, 0.25 * robotBodyDepth);  // Scale the kneecap
+	glutSolidCube(1.0);  // Draw kneecap
+	glPopMatrix();
+
+	// Move down for knee joint
 	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
 	// Knee rotation
 	glRotatef(kneeAngleLeft, 1.0, 0.0, 0.0); // Rotate knee
@@ -440,7 +457,7 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
 
-	glRotatef(-15, 1.0, 0.0, 0.0); // Rotate to maintain zig-zag
+	glRotatef(-15, 1.0, 0.0, 0.0); // Rotate to maintain zig-zag pose
 	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
 	glPopMatrix(); // End lower leg segment
@@ -497,7 +514,7 @@ void drawLowerBody()
 
 	glPopMatrix(); // End left leg
 
-	// Right leg (similar to left leg, mirrored)
+	// Right leg (copy of the left leg but mirrored)
 	glPushMatrix();
 	// Move the leg lower to connect better to the body
 	glTranslatef(-0.5 * robotBodyWidth, -0.7 * robotBodyLength, 0.0); // Adjust leg height
@@ -512,11 +529,23 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, beige_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, beige_mat_shininess);
 
-	// Zig-zag rotation for upper leg
-	glRotatef(15, 1.0, 0.0, 0.0);
+	glRotatef(15, 1.0, 0.0, 0.0); // Zig-zag pose
 	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
 	glPopMatrix(); // End upper leg segment
+
+	// Add kneecap
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, light_brown_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, light_brown_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, light_brown_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
+
+	// Adjust kneecap placement
+	glTranslatef(0.0, -0.25 * robotBodyLength, -0.05 * robotBodyDepth);  // Move kneecap forward
+	glScalef(0.25 * robotBodyWidth, 0.1 * robotBodyLength, 0.25 * robotBodyDepth);  // Adjust kneecap scale
+	glutSolidCube(1.0);
+	glPopMatrix();
 
 	// Move down for knee
 	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
@@ -530,7 +559,7 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
 
-	glRotatef(-15, 1.0, 0.0, 0.0); // Rotate to maintain zig-zag
+	glRotatef(-15, 1.0, 0.0, 0.0); // Zig-zag rotation
 	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
 	glPopMatrix(); // End lower leg segment
@@ -561,33 +590,32 @@ void drawLowerBody()
 	glutSolidCube(1.0);
 	glPopMatrix();
 
-    // Second front dent
-    glPushMatrix();
-    glTranslatef(0.15 * robotBodyDepth, 0.0, 0.4 * robotBodyWidth); // Move to the front-right
-    glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
-    glutSolidCube(1.0);
-    glPopMatrix();
+	// Second front dent
+	glPushMatrix();
+	glTranslatef(0.15 * robotBodyDepth, 0.0, 0.4 * robotBodyWidth); // Move to the front-right
+	glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+	glutSolidCube(1.0);
+	glPopMatrix();
 
-    // Add two dents in back of the foot
-    // First back dent
-    glPushMatrix();
-    glTranslatef(-0.15 * robotBodyDepth, 0.0, -0.4 * robotBodyWidth); // Move to the back-left
-    glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
-    glutSolidCube(1.0);
-    glPopMatrix();
+	// Add two dents in back of the foot
+	// First back dent
+	glPushMatrix();
+	glTranslatef(-0.15 * robotBodyDepth, 0.0, -0.4 * robotBodyWidth); // Move to the back-left
+	glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+	glutSolidCube(1.0);
+	glPopMatrix();
 
-    // Second back dent
-    glPushMatrix();
-    glTranslatef(0.15 * robotBodyDepth, 0.0, -0.4 * robotBodyWidth); // Move to the back-right
-    glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
-    glutSolidCube(1.0);
-    glPopMatrix();
+	// Second back dent
+	glPushMatrix();
+	glTranslatef(0.15 * robotBodyDepth, 0.0, -0.4 * robotBodyWidth); // Move to the back-right
+	glScalef(0.1 * robotBodyDepth, 0.1 * robotBodyLength, 0.2 * robotBodyWidth); // Small cube for the dent
+	glutSolidCube(1.0);
+	glPopMatrix();
 
-    glPopMatrix(); // End right foot
+	glPopMatrix(); // End right foot
 
-    glPopMatrix(); // End right leg
+	glPopMatrix(); // End right leg
 }
-
 
 void drawLeftArm()
 {
@@ -636,7 +664,6 @@ void drawLeftArm()
 	glPopMatrix();  // End of hand
 	glPopMatrix();  // End of arm
 }
-
 
 void drawRightArm()
 {
@@ -794,16 +821,16 @@ void keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-	case 'k':  // Control knees
-		selectedJoint = 1;
+	case 'k':  // Control left knee
+		selectedJoint = 1;  // Select knee joint
 		break;
-	case 'h':  // Control hips
-		selectedJoint = 2;
+	case 'h':  // Control left hip
+		selectedJoint = 2;  // Select hip joint
 		break;
 	case 'n':  // Control neck (head rotation)
 		selectedJoint = 3;
 		break;
-	case 'b':  // Select body rotation (selectedJoint = 4)
+	case 'b':  // Select body rotation
 		selectedJoint = 4;
 		break;
 	case '1':  // Default view (isometric)
@@ -846,21 +873,24 @@ void animationHandler(int param)
 	}
 }
 
-
 void functionKeys(int key, int x, int y)
 {
 	switch (key)
 	{
 	case GLUT_KEY_LEFT:
+		// Control right knee when 'k' is pressed
 		if (selectedJoint == 1) {
-			kneeAngleLeft += 2.0f;  // Rotate left knee
+			kneeAngleRight += 2.0f;  // Rotate right knee
 		}
+		// Control right hip when 'h' is pressed
 		else if (selectedJoint == 2) {
-			hipAngleLeft += 2.0f;   // Rotate left hip
+			hipAngleRight += 2.0f;   // Rotate right hip
 		}
+		// Control neck
 		else if (selectedJoint == 3) {
 			neckAngle += 2.0f;     // Rotate neck (left turn)
 		}
+		// Control body rotation
 		else if (selectedJoint == 4) {
 			robotAngle += 2.0f;    // Rotate body (left)
 			if (robotAngle > 360.0f) {
@@ -870,15 +900,19 @@ void functionKeys(int key, int x, int y)
 		break;
 
 	case GLUT_KEY_RIGHT:
+		// Control right knee when 'k' is pressed
 		if (selectedJoint == 1) {
-			kneeAngleLeft -= 2.0f;  // Rotate left knee in the opposite direction
+			kneeAngleRight -= 2.0f;  // Rotate right knee in the opposite direction
 		}
+		// Control right hip when 'h' is pressed
 		else if (selectedJoint == 2) {
-			hipAngleLeft -= 2.0f;   // Rotate left hip in the opposite direction
+			hipAngleRight -= 2.0f;   // Rotate right hip in the opposite direction
 		}
+		// Control neck
 		else if (selectedJoint == 3) {
 			neckAngle -= 2.0f;     // Rotate neck (right turn)
 		}
+		// Control body rotation
 		else if (selectedJoint == 4) {
 			robotAngle -= 2.0f;    // Rotate body (right)
 			if (robotAngle < -360.0f) {
@@ -888,12 +922,15 @@ void functionKeys(int key, int x, int y)
 		break;
 
 	case GLUT_KEY_UP:
+		// Control left knee when 'k' is pressed
 		if (selectedJoint == 1) {
-			kneeAngleRight += 2.0f;  // Rotate right knee
+			kneeAngleLeft += 2.0f;  // Rotate left knee
 		}
+		// Control left hip when 'h' is pressed
 		else if (selectedJoint == 2) {
-			hipAngleRight += 2.0f;   // Rotate right hip
+			hipAngleLeft += 2.0f;   // Rotate left hip
 		}
+		// Control neck
 		else if (selectedJoint == 3) {
 			neckAngle += 2.0f;     // Rotate neck (upward turn - simulating look up)
 		}
@@ -903,12 +940,15 @@ void functionKeys(int key, int x, int y)
 		break;
 
 	case GLUT_KEY_DOWN:
+		// Control left knee when 'k' is pressed
 		if (selectedJoint == 1) {
-			kneeAngleRight -= 2.0f;  // Rotate right knee in the opposite direction
+			kneeAngleLeft -= 2.0f;  // Rotate left knee in the opposite direction
 		}
+		// Control left hip when 'h' is pressed
 		else if (selectedJoint == 2) {
-			hipAngleRight -= 2.0f;   // Rotate right hip in the opposite direction
+			hipAngleLeft -= 2.0f;   // Rotate left hip in the opposite direction
 		}
+		// Control neck
 		else if (selectedJoint == 3) {
 			neckAngle -= 2.0f;     // Rotate neck (downward turn - simulating look down)
 		}
