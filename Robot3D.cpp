@@ -235,14 +235,15 @@ void display(void)
 	// Draw Robot
 	drawRobot();
 
-	// Draw ground
+	// Draw ground (lowered further)
 	glPushMatrix();
-	glTranslatef(0.0, -20.0, 0.0);
+	glTranslatef(0.0, -25.0, 0.0);  // Lowered the ground to -30.0
 	groundMesh->DrawMesh(meshSize);
 	glPopMatrix();
 
 	glutSwapBuffers();   // Double buffering, swap buffers
 }
+
 
 void drawRobot()
 {
@@ -313,7 +314,6 @@ void drawHead()
 	GLfloat dark_grey_specular[] = { 0.2f, 0.2f, 0.2f, 1.0f };
 	GLfloat dark_grey_shininess[] = { 50.0f };
 
-	// Blue for the visor
 	GLfloat blue_ambient[] = { 0.0f, 0.0f, 1.0f, 1.0f };
 	GLfloat blue_diffuse[] = { 0.0f, 0.0f, 1.0f, 1.0f };
 	GLfloat blue_specular[] = { 0.1f, 0.1f, 0.1f, 1.0f };
@@ -427,7 +427,7 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_SHININESS, beige_mat_shininess);
 
 	// Rotate and scale the upper leg
-	glRotatef(15, 1.0, 0.0, 0.0); // Slight rotation for a zig-zag pose
+	glRotatef(-15, 1.0, 0.0, 0.0); // Slight rotation for a zig-zag pose
 	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
 	glPopMatrix(); // End upper leg segment
@@ -440,7 +440,7 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
 
 	// Adjust kneecap placement (slightly forward on the Z-axis)
-	glTranslatef(0.0, -0.25 * robotBodyLength, -0.05 * robotBodyDepth);  // Move kneecap forward slightly
+	glTranslatef(0.0, -0.25 * robotBodyLength, 0.10 * robotBodyDepth);  // Move kneecap forward slightly
 	glScalef(0.25 * robotBodyWidth, 0.1 * robotBodyLength, 0.25 * robotBodyDepth);  // Scale the kneecap
 	glutSolidCube(1.0);  // Draw kneecap
 	glPopMatrix();
@@ -457,13 +457,42 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
 
-	glRotatef(-15, 1.0, 0.0, 0.0); // Rotate to maintain zig-zag pose
+	glRotatef(15, 1.0, 0.0, 0.0); // Rotate to maintain zig-zag pose
 	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
 	glPopMatrix(); // End lower leg segment
 
-	// Move down for ankle
+	// New kneecap between the two green parts
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, light_brown_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, light_brown_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, light_brown_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
+
+	// Translate to position the kneecap between the two green parts
+	glTranslatef(0.0, -0.25 * robotBodyLength, 0.0); // Adjust based on the spacing between the two green parts
+	glScalef(0.25 * robotBodyWidth, 0.1 * robotBodyLength, 0.25 * robotBodyDepth);
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Move down for the second (third part) green leg
 	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
+
+	// Second green part - same size as the previous green part
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, green_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, green_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
+
+	glRotatef(-15, 1.0, 0.0, 0.0); // Continue zig-zag pose
+	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
+	glutSolidCube(1.0);
+	glPopMatrix(); // End second green part
+
+	// Move down for ankle (adjusted to move feet up)
+	glTranslatef(0.0, -0.3 * robotBodyLength, 0.0);  // Reduced from -0.5 to -0.3 for closer connection
+
 	// Ankle rotation
 	glRotatef(ankleAngleLeft, 1.0, 0.0, 0.0); // Rotate ankle
 
@@ -529,7 +558,7 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, beige_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, beige_mat_shininess);
 
-	glRotatef(15, 1.0, 0.0, 0.0); // Zig-zag pose
+	glRotatef(-15, 1.0, 0.0, 0.0); // Zig-zag pose
 	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
 	glPopMatrix(); // End upper leg segment
@@ -542,7 +571,7 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
 
 	// Adjust kneecap placement
-	glTranslatef(0.0, -0.25 * robotBodyLength, -0.05 * robotBodyDepth);  // Move kneecap forward
+	glTranslatef(0.0, -0.25 * robotBodyLength, 0.10 * robotBodyDepth);  // Move kneecap forward
 	glScalef(0.25 * robotBodyWidth, 0.1 * robotBodyLength, 0.25 * robotBodyDepth);  // Adjust kneecap scale
 	glutSolidCube(1.0);
 	glPopMatrix();
@@ -559,13 +588,41 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
 
-	glRotatef(-15, 1.0, 0.0, 0.0); // Zig-zag rotation
+	glRotatef(15, 1.0, 0.0, 0.0); // Zig-zag rotation
 	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
 	glPopMatrix(); // End lower leg segment
 
-	// Move down for ankle
+	// New kneecap between the two green parts (right leg)
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, light_brown_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, light_brown_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, light_brown_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
+
+	glTranslatef(0.0, -0.25 * robotBodyLength, 0.0); // Adjust for kneecap position
+	glScalef(0.25 * robotBodyWidth, 0.1 * robotBodyLength, 0.25 * robotBodyDepth);
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	// Move down for the second green part (right leg)
 	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
+
+	// Second green part (right leg)
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, green_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, green_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
+
+	glRotatef(-15, 1.0, 0.0, 0.0); // Continue zig-zag pose
+	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
+	glutSolidCube(1.0);
+	glPopMatrix(); // End second green part
+
+	// Move down for ankle (adjusted to move feet up)
+	glTranslatef(0.0, -0.3 * robotBodyLength, 0.0);  // Reduced from -0.5 to -0.3 for closer connection
+
 	// Ankle rotation
 	glRotatef(ankleAngleRight, 1.0, 0.0, 0.0); // Rotate ankle
 
@@ -617,7 +674,9 @@ void drawLowerBody()
 	glPopMatrix(); // End right leg
 }
 
-void drawLeftArm() {
+
+void drawLeftArm()
+{
 	// Set the material for the arm
 	glMaterialfv(GL_FRONT, GL_AMBIENT, robotArm_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, robotArm_mat_specular);
@@ -626,41 +685,46 @@ void drawLeftArm() {
 
 	glPushMatrix();
 	// Position arm with respect to parent body
-	glTranslatef(0.5 * robotBodyWidth + 0.5 * upperArmWidth, 0, 0.0);
+	glTranslatef(0.5 * robotBodyWidth + 0.5 * upperArmWidth, 0, 0.0); // this will be done last
 
-	// Draw upper arm
+	// Build arm
 	glPushMatrix();
 	glScalef(upperArmWidth, upperArmLength, upperArmWidth);
 	glutSolidCube(1.0);
 	glPopMatrix();
 
-	// Add hand
+	// Now let's add a hand at the end of the arm
+	// Use the gun material properties for the hand color
 	glMaterialfv(GL_FRONT, GL_AMBIENT, gun_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, gun_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, gun_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, gun_mat_shininess);
 
+	// Position the hand at the end of the arm
 	glPushMatrix();
-	glTranslatef(0.0, -0.5 * upperArmLength - 0.2, 0.0); // Position hand at end of arm
-	glScalef(0.5 * upperArmWidth, 0.3 * upperArmLength, 0.5 * upperArmWidth);
-	glutSolidCube(1.0); // Draw hand
+	glTranslatef(0.0, -0.5 * upperArmLength - 0.2, 0.0);  // Attach to the end of the arm
+	glScalef(0.7 * upperArmWidth, 0.5 * upperArmLength, 0.7 * upperArmWidth);  // Increased palm thickness
+	glutSolidCube(1.0);  // Hand (palm)
 
-	// Draw fingers (shorter and thicker)
-	float fingerWidth = 0.06 * upperArmWidth;
-	float fingerLength = 0.1 * upperArmLength;
+	// Now we add the 5 fingers (thicker and shorter)
+	float fingerWidth = 0.06 * upperArmWidth; // Thicker fingers
+	float fingerLength = 0.05 * upperArmLength; // Shorter length for fingers
+
+	// Draw 5 fingers
 	for (int i = -2; i <= 2; i++) {
 		glPushMatrix();
-		glTranslatef(i * (0.12 * upperArmWidth), -0.3 * (0.3 * upperArmLength), 0.0); // Space fingers
-		glScalef(fingerWidth, fingerLength, fingerWidth); // Scale fingers
+		glTranslatef(i * (0.12 * upperArmWidth), -0.2 * (0.3 * upperArmLength), 0.0);  // Move fingers up
+		glScalef(fingerWidth, fingerLength, fingerWidth);  // Scale fingers to thicker and shorter size
 		glutSolidCube(1.0);
 		glPopMatrix();
 	}
 
-	glPopMatrix(); // End hand
-	glPopMatrix(); // End arm
+	glPopMatrix();  // End of hand
+	glPopMatrix();  // End of arm
 }
 
-void drawRightArm() {
+void drawRightArm()
+{
 	// Set material properties for the arm
 	glMaterialfv(GL_FRONT, GL_AMBIENT, robotArm_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, robotArm_mat_specular);
@@ -669,57 +733,65 @@ void drawRightArm() {
 
 	glPushMatrix();
 
-	// Position arm with respect to parent body
-	glTranslatef(-(0.5 * robotBodyWidth + 0.5 * upperArmWidth), 0.2 * robotBodyLength, 0.2 * robotBodyDepth); // Adjust position
-	glRotatef(-45.0, 1.0, 0.0, 0.0); // Tilt arm
+	// Adjust translation to mirror the left arm, move it up and forward slightly
+	glTranslatef(-(0.5 * robotBodyWidth + 0.5 * upperArmWidth), 0.2 * robotBodyLength, 0.2 * robotBodyDepth); // Moved forward slightly on the Z-axis
+	glRotatef(-45.0, 1.0, 0.0, 0.0); // Tilt arm forward
 
-	// Draw upper arm
+	// Draw the arm (upper arm)
 	glPushMatrix();
 	glScalef(upperArmWidth, upperArmLength, upperArmWidth);
 	glutSolidCube(1.0);
 	glPopMatrix();
 
-	// Draw the cannon (attach to arm)
+	// Now handle the cannon attached to the arm
 	glMaterialfv(GL_FRONT, GL_AMBIENT, gun_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, gun_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, gun_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, gun_mat_shininess);
 
+	// Position the cannon at the end of the arm
 	glPushMatrix();
-	glTranslatef(0.0, -0.5 * upperArmLength - 0.5 * gunLength, 0.0); // Attach cannon
+	glTranslatef(0.0, -0.5 * upperArmLength - 0.5 * gunLength, 0.0);  // Attach to the end of the arm
 
-	// Spin the cannon if needed
+	// Apply cannon spin along its Y-axis (screw-like spin)
 	if (spinCannon) {
-		glRotatef(cannonSpinAngle, 0.0, 1.0, 0.0); // Spin cannon
+		glRotatef(cannonSpinAngle, 0.0, 1.0, 0.0);  // Spin along the Y-axis
 	}
 
-	// Draw cannon body
+	// Draw the gun (cannon body)
 	glPushMatrix();
 	glScalef(gunWidth, gunLength, gunDepth);
-	glutSolidCube(1.0);
+	glutSolidCube(1.0);  // Cannon body
 	glPopMatrix();
 
-	// Draw cannon barrel
+	// Draw the cannon barrel (cylinder)
 	glPushMatrix();
-	glTranslatef(0.0, -0.5 * gunLength, 0.0); // Barrel position
-	glRotatef(90.0, 1.0, 0.0, 0.0); // Rotate for correct alignment
+	glTranslatef(0.0, -0.5 * gunLength, 0.0);  // Move to the end of the cannon
+	glRotatef(90.0, 1.0, 0.0, 0.0);  // Align the cylinder properly
 	GLUquadric* quad = gluNewQuadric();
-	gluCylinder(quad, 1.5, 1.5, 5.0, 40, 20); // Barrel cylinder
+	gluCylinder(quad, 1.5, 1.5, 5.0, 40, 20);  // Barrel
 	glPopMatrix();
 
-	// Draw orange projectile inside the cannon
+	// Draw the orange projectile inside the cannon
 	glPushMatrix();
 	glMaterialfv(GL_FRONT, GL_AMBIENT, red_orange_ambient);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, red_orange_diffuse);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, red_orange_specular);
 	glMaterialfv(GL_FRONT, GL_SHININESS, red_orange_shininess);
-	glTranslatef(0.0, -2.5 * gunLength, 0.0); // Position projectile
+	glTranslatef(0.0, -2.5 * gunLength, 0.0);  // Inside the cannon
 	glScalef(gunWidth * 0.5, gunLength * 0.1, gunDepth * 0.5);
-	glutSolidCube(1.0); // Draw projectile
+	glutSolidCube(1.0);  // The orange projectile
 	glPopMatrix();
 
-	glPopMatrix(); // End cannon
-	glPopMatrix(); // End arm
+	// Draw the magazine under the cannon
+	glPushMatrix();
+	glTranslatef(0.0, -gunLength - 1.0, 0.0);  // Position magazine below the cannon
+	glScalef(gunWidth * 0.8, gunLength * 0.4, gunDepth * 0.8);  // Scale the magazine
+	glutSolidCube(1.0);
+	glPopMatrix();
+
+	glPopMatrix();  // End cannon drawing
+	glPopMatrix();  // End arm drawing
 }
 
 void reshape(int w, int h)
