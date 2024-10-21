@@ -611,6 +611,8 @@ void drawLowerBody()
 
 	// Move down for the second green part (right leg)
 	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
+	// Lower leg rotation
+	glRotatef(lowerLegAngleLeft, 1.0, 0.0, 0.0);
 
 	// Second green part (right leg)
 	glPushMatrix();
@@ -822,28 +824,31 @@ void stepAnimation(int value)
 		// Move left leg forward, right leg backward
 		if (walkingForward) {
 			// Move left leg forward
-			if (hipAngleLeft < 30.0f) {
+			if (hipAngleLeft < 50.0f) {
 				hipAngleLeft += 2.0f;   // Raise left hip
-				kneeAngleLeft -= 2.0f;  // Bend left knee
+				kneeAngleLeft -= 1.5f;  // Bend left knee
 				ankleAngleLeft += 1.0f; // Raise left ankle
+				lowerLegAngleLeft += 2.0f; // Rotate the lower leg at the new joint
 			}
 			else {
 				walkingForward = false;  // Switch to moving backward
 			}
 
 			// Move right leg backward
-			if (hipAngleRight > -30.0f) {
+			if (hipAngleRight > -50.0f) {
 				hipAngleRight -= 2.0f;   // Lower right hip
-				kneeAngleRight += 2.0f;  // Straighten right knee
+				kneeAngleRight += 1.5f;  // Straighten right knee
 				ankleAngleRight -= 1.0f; // Lower right ankle
+				lowerLegAngleRight -= 2.0f; // Rotate the lower leg at the new joint
 			}
 		}
 		else { // Move legs in reverse direction (reset position)
 			// Move left leg backward
 			if (hipAngleLeft > 0.0f) {
 				hipAngleLeft -= 2.0f;   // Lower left hip
-				kneeAngleLeft += 2.0f;  // Straighten left knee
+				kneeAngleLeft += 1.5f;  // Straighten left knee
 				ankleAngleLeft -= 1.0f; // Lower left ankle
+				lowerLegAngleLeft -= 2.0f; // Reset the lower leg joint angle
 			}
 			else {
 				walkingForward = true;   // Switch to moving forward
@@ -852,8 +857,9 @@ void stepAnimation(int value)
 			// Move right leg forward
 			if (hipAngleRight < 0.0f) {
 				hipAngleRight += 2.0f;   // Raise right hip
-				kneeAngleRight -= 2.0f;  // Bend right knee
+				kneeAngleRight -= 1.5f;  // Bend right knee
 				ankleAngleRight += 1.0f; // Raise right ankle
+				lowerLegAngleRight += 2.0f; // Rotate the lower leg at the new joint
 			}
 		}
 
