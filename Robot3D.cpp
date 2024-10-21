@@ -353,6 +353,19 @@ void drawLowerBody()
 	glutSolidCube(1.0);
 	glPopMatrix(); // End upper leg segment
 
+	// Add kneecap before moving down for the lower leg
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, light_brown_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, light_brown_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, light_brown_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
+
+	// Adjust kneecap placement (slightly forward on the Z-axis)
+	glTranslatef(0.0, -0.25 * robotBodyLength, -0.05 * robotBodyDepth);  // Adjust position (slightly move forward)
+	glScalef(0.25 * robotBodyWidth, 0.1 * robotBodyLength, 0.25 * robotBodyDepth);  // Adjust kneecap scale
+	glutSolidCube(1.0);  // Kneecap
+	glPopMatrix();
+
 	// Move down for knee
 	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
 	// Knee rotation
@@ -408,6 +421,19 @@ void drawLowerBody()
 	glScalef(0.2 * robotBodyWidth, 0.5 * robotBodyLength, 0.2 * robotBodyDepth);
 	glutSolidCube(1.0);
 	glPopMatrix(); // End upper leg segment
+
+	// Add kneecap before moving down for the lower leg
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, light_brown_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, light_brown_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, light_brown_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
+
+	// Adjust kneecap placement for right leg (slightly move forward on the Z-axis)
+	glTranslatef(0.0, -0.25 * robotBodyLength, -0.05 * robotBodyDepth);  // Move kneecap forward slightly
+	glScalef(0.25 * robotBodyWidth, 0.1 * robotBodyLength, 0.25 * robotBodyDepth);  // Adjust kneecap scale
+	glutSolidCube(1.0);  // Kneecap
+	glPopMatrix();
 
 	// Move down for knee
 	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
@@ -621,16 +647,16 @@ void keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-	case 'k':  // Control knees
-		selectedJoint = 1;
+	case 'k':  // Control left knee
+		selectedJoint = 1;  // Select knee joint
 		break;
-	case 'h':  // Control hips
-		selectedJoint = 2;
+	case 'h':  // Control left hip
+		selectedJoint = 2;  // Select hip joint
 		break;
 	case 'n':  // Control neck (head rotation)
 		selectedJoint = 3;
 		break;
-	case 'b':  // Select body rotation (selectedJoint = 4)
+	case 'b':  // Select body rotation
 		selectedJoint = 4;
 		break;
 	case '1':  // Default view (isometric)
@@ -673,21 +699,24 @@ void animationHandler(int param)
 	}
 }
 
-
 void functionKeys(int key, int x, int y)
 {
 	switch (key)
 	{
 	case GLUT_KEY_LEFT:
+		// Control right knee when 'k' is pressed
 		if (selectedJoint == 1) {
-			kneeAngleLeft += 2.0f;  // Rotate left knee
+			kneeAngleRight += 2.0f;  // Rotate right knee
 		}
+		// Control right hip when 'h' is pressed
 		else if (selectedJoint == 2) {
-			hipAngleLeft += 2.0f;   // Rotate left hip
+			hipAngleRight += 2.0f;   // Rotate right hip
 		}
+		// Control neck
 		else if (selectedJoint == 3) {
 			neckAngle += 2.0f;     // Rotate neck (left turn)
 		}
+		// Control body rotation
 		else if (selectedJoint == 4) {
 			robotAngle += 2.0f;    // Rotate body (left)
 			if (robotAngle > 360.0f) {
@@ -697,15 +726,19 @@ void functionKeys(int key, int x, int y)
 		break;
 
 	case GLUT_KEY_RIGHT:
+		// Control right knee when 'k' is pressed
 		if (selectedJoint == 1) {
-			kneeAngleLeft -= 2.0f;  // Rotate left knee in the opposite direction
+			kneeAngleRight -= 2.0f;  // Rotate right knee in the opposite direction
 		}
+		// Control right hip when 'h' is pressed
 		else if (selectedJoint == 2) {
-			hipAngleLeft -= 2.0f;   // Rotate left hip in the opposite direction
+			hipAngleRight -= 2.0f;   // Rotate right hip in the opposite direction
 		}
+		// Control neck
 		else if (selectedJoint == 3) {
 			neckAngle -= 2.0f;     // Rotate neck (right turn)
 		}
+		// Control body rotation
 		else if (selectedJoint == 4) {
 			robotAngle -= 2.0f;    // Rotate body (right)
 			if (robotAngle < -360.0f) {
@@ -715,12 +748,15 @@ void functionKeys(int key, int x, int y)
 		break;
 
 	case GLUT_KEY_UP:
+		// Control left knee when 'k' is pressed
 		if (selectedJoint == 1) {
-			kneeAngleRight += 2.0f;  // Rotate right knee
+			kneeAngleLeft += 2.0f;  // Rotate left knee
 		}
+		// Control left hip when 'h' is pressed
 		else if (selectedJoint == 2) {
-			hipAngleRight += 2.0f;   // Rotate right hip
+			hipAngleLeft += 2.0f;   // Rotate left hip
 		}
+		// Control neck
 		else if (selectedJoint == 3) {
 			neckAngle += 2.0f;     // Rotate neck (upward turn - simulating look up)
 		}
@@ -730,12 +766,15 @@ void functionKeys(int key, int x, int y)
 		break;
 
 	case GLUT_KEY_DOWN:
+		// Control left knee when 'k' is pressed
 		if (selectedJoint == 1) {
-			kneeAngleRight -= 2.0f;  // Rotate right knee in the opposite direction
+			kneeAngleLeft -= 2.0f;  // Rotate left knee in the opposite direction
 		}
+		// Control left hip when 'h' is pressed
 		else if (selectedJoint == 2) {
-			hipAngleRight -= 2.0f;   // Rotate right hip in the opposite direction
+			hipAngleLeft -= 2.0f;   // Rotate left hip in the opposite direction
 		}
+		// Control neck
 		else if (selectedJoint == 3) {
 			neckAngle -= 2.0f;     // Rotate neck (downward turn - simulating look down)
 		}
