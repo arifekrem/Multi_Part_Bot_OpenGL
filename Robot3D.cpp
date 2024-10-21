@@ -42,6 +42,8 @@ float ankleAngleLeft = 0.0f; // Angle for left ankle joint
 float hipAngleRight = 0.0f;  // Angle for right hip joint
 float kneeAngleRight = 0.0f; // Angle for right knee joint
 float ankleAngleRight = 0.0f; // Angle for right ankle joint
+float lowerLegAngleLeft = 0.0f;  // Angle for rotating lower part of the left leg
+float lowerLegAngleRight = 0.0f; // Angle for rotating lower part of the right leg
 
 // Flag to control walking state
 bool walking = false;
@@ -70,31 +72,30 @@ GLfloat robotArm_mat_diffuse[] = { 0.4f, 0.5f, 0.2f, 1.0f };
 GLfloat robotArm_mat_specular[] = { 0.7f, 0.6f, 0.6f, 1.0f };
 GLfloat robotArm_mat_shininess[] = { 32.0F };
 
-GLfloat dark_grey_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };  
-GLfloat dark_grey_diffuse[] = { 0.15f, 0.15f, 0.15f, 1.0f };  
-GLfloat dark_grey_specular[] = { 0.2f, 0.2f, 0.2f, 1.0f };  
-GLfloat dark_grey_shininess[] = { 50.0f };  
-
+GLfloat dark_grey_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+GLfloat dark_grey_diffuse[] = { 0.15f, 0.15f, 0.15f, 1.0f };
+GLfloat dark_grey_specular[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+GLfloat dark_grey_shininess[] = { 50.0f };
 
 GLfloat robotLowerBody_mat_ambient[] = { 0.25f, 0.25f, 0.25f, 1.0f };
 GLfloat robotLowerBody_mat_diffuse[] = { 0.4f, 0.4f, 0.4f, 1.0f };
 GLfloat robotLowerBody_mat_specular[] = { 0.774597f, 0.774597f, 0.774597f, 1.0f };
 GLfloat robotLowerBody_mat_shininess[] = { 76.8F };
 
-GLfloat green_mat_ambient[] = { 0.02f, 0.15f, 0.02f, 1.0f }; 
-GLfloat green_mat_diffuse[] = { 0.05f, 0.2f, 0.05f, 0.1f };  
-GLfloat green_mat_specular[] = { 0.2f, 0.2f, 0.2f, 1.0f }; 
-GLfloat green_mat_shininess[] = { 100.0f }; 
+GLfloat green_mat_ambient[] = { 0.02f, 0.15f, 0.02f, 1.0f };
+GLfloat green_mat_diffuse[] = { 0.05f, 0.2f, 0.05f, 0.1f };
+GLfloat green_mat_specular[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+GLfloat green_mat_shininess[] = { 100.0f };
 
-GLfloat beige_mat_ambient[] = { 0.6f, 0.5f, 0.3f, 1.0f };  
-GLfloat beige_mat_specular[] = { 0.1f, 0.1f, 0.1f, 1.0f };  
-GLfloat beige_mat_diffuse[] = { 0.7f, 0.6f, 0.4f, 1.0f };  
-GLfloat beige_mat_shininess[] = { 30.0f };  
+GLfloat beige_mat_ambient[] = { 0.6f, 0.5f, 0.3f, 1.0f };
+GLfloat beige_mat_specular[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+GLfloat beige_mat_diffuse[] = { 0.7f, 0.6f, 0.4f, 1.0f };
+GLfloat beige_mat_shininess[] = { 30.0f };
 
-GLfloat light_brown_mat_ambient[] = { 0.3f, 0.2f, 0.1f, 1.0f }; 
+GLfloat light_brown_mat_ambient[] = { 0.3f, 0.2f, 0.1f, 1.0f };
 GLfloat light_brown_mat_specular[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-GLfloat light_brown_mat_diffuse[] = { 0.4f, 0.3f, 0.2f, 1.0f }; 
-GLfloat light_brown_mat_shininess[] = { 30.0f }; 
+GLfloat light_brown_mat_diffuse[] = { 0.4f, 0.3f, 0.2f, 1.0f };
+GLfloat light_brown_mat_shininess[] = { 30.0f };
 
 GLfloat red_orange_ambient[] = { 0.8f, 0.2f, 0.0f, 1.0f };
 GLfloat red_orange_diffuse[] = { 0.9f, 0.3f, 0.1f, 1.0f };
@@ -309,10 +310,10 @@ void drawHead()
 	GLfloat white_specular[] = { 0.5f, 0.5f, 0.5f, 1.0f };
 	GLfloat white_shininess[] = { 50.0f };
 
-	GLfloat cyan_ambient[] = { 0.0f, 1.0f, 1.0f, 1.0f };  
-	GLfloat cyan_diffuse[] = { 0.0f, 1.0f, 1.0f, 1.0f };  
-	GLfloat cyan_specular[] = { 0.1f, 0.1f, 0.1f, 1.0f };  
-	GLfloat cyan_shininess[] = { 30.0f };  
+	GLfloat cyan_ambient[] = { 0.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat cyan_diffuse[] = { 0.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat cyan_specular[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+	GLfloat cyan_shininess[] = { 30.0f };
 
 	glMaterialfv(GL_FRONT, GL_AMBIENT, dark_grey_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, dark_grey_specular);
@@ -399,12 +400,6 @@ void drawLowerBody()
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, green_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, green_mat_shininess);
 
-	// Grey
-	glMaterialfv(GL_FRONT, GL_AMBIENT, dark_grey_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, dark_grey_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, dark_grey_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, dark_grey_shininess);
-
 	// Position the green section (between the legs) under the upper body but not affected by rotation
 	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);  // Move to where the green section is positioned
 	glScalef(0.8 * robotBodyWidth, robotBodyLength / 3.0, 0.8 * robotBodyDepth);  // Scale to match the body proportions
@@ -434,10 +429,10 @@ void drawLowerBody()
 
 	// Add kneecap before moving down for the lower leg
 	glPushMatrix();
-	glMaterialfv(GL_FRONT, GL_AMBIENT, dark_grey_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, dark_grey_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, dark_grey_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, dark_grey_shininess);
+	glMaterialfv(GL_FRONT, GL_AMBIENT, light_brown_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, light_brown_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, light_brown_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
 
 	// Adjust kneecap placement (slightly forward on the Z-axis)
 	glTranslatef(0.0, -0.25 * robotBodyLength, 0.10 * robotBodyDepth);  // Move kneecap forward slightly
@@ -464,10 +459,10 @@ void drawLowerBody()
 
 	// New kneecap between the two green parts
 	glPushMatrix();
-	glMaterialfv(GL_FRONT, GL_AMBIENT, dark_grey_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, dark_grey_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, dark_grey_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, dark_grey_shininess);
+	glMaterialfv(GL_FRONT, GL_AMBIENT, light_brown_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, light_brown_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, light_brown_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
 
 	// Translate to position the kneecap between the two green parts
 	glTranslatef(0.0, -0.25 * robotBodyLength, 0.0); // Adjust based on the spacing between the two green parts
@@ -477,6 +472,8 @@ void drawLowerBody()
 
 	// Move down for the second (third part) green leg
 	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
+	// Lower leg rotation
+	glRotatef(lowerLegAngleLeft, 1.0, 0.0, 0.0);
 
 	// Second green part - same size as the previous green part
 	glPushMatrix();
@@ -565,10 +562,10 @@ void drawLowerBody()
 
 	// Add kneecap
 	glPushMatrix();
-	glMaterialfv(GL_FRONT, GL_AMBIENT, dark_grey_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, dark_grey_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, dark_grey_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, dark_grey_shininess);
+	glMaterialfv(GL_FRONT, GL_AMBIENT, light_brown_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, light_brown_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, light_brown_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
 
 	// Adjust kneecap placement
 	glTranslatef(0.0, -0.25 * robotBodyLength, 0.10 * robotBodyDepth);  // Move kneecap forward
@@ -595,10 +592,10 @@ void drawLowerBody()
 
 	// New kneecap between the two green parts (right leg)
 	glPushMatrix();
-	glMaterialfv(GL_FRONT, GL_AMBIENT, dark_grey_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, dark_grey_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, dark_grey_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, dark_grey_shininess);
+	glMaterialfv(GL_FRONT, GL_AMBIENT, light_brown_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, light_brown_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, light_brown_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, light_brown_mat_shininess);
 
 	glTranslatef(0.0, -0.25 * robotBodyLength, 0.0); // Adjust for kneecap position
 	glScalef(0.25 * robotBodyWidth, 0.1 * robotBodyLength, 0.25 * robotBodyDepth);
@@ -607,6 +604,8 @@ void drawLowerBody()
 
 	// Move down for the second green part (right leg)
 	glTranslatef(0.0, -0.5 * robotBodyLength, 0.0);
+	// Lower leg rotation
+	glRotatef(lowerLegAngleRight, 1.0, 0.0, 0.0);
 
 	// Second green part (right leg)
 	glPushMatrix();
@@ -775,7 +774,7 @@ void drawRightArm()
 
 	// Add the brown elbow joint
 	glPushMatrix();
-	glMaterialfv(GL_FRONT, GL_AMBIENT, dark_grey_ambient);  
+	glMaterialfv(GL_FRONT, GL_AMBIENT, dark_grey_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, dark_grey_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, dark_grey_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, dark_grey_shininess);
@@ -875,41 +874,47 @@ bool stop = false;
 void stepAnimation(int value)
 {
 	if (walking) {
-		// Move left leg forward, right leg backward
+		// Move legs in opposite directions
 		if (walkingForward) {
-			// Move left leg forward
-			if (hipAngleLeft < 30.0f) {
+			// Move left leg forward, right leg backward
+			if (hipAngleLeft < 50.0f) {
 				hipAngleLeft += 2.0f;   // Raise left hip
-				kneeAngleLeft -= 2.0f;  // Bend left knee
+				kneeAngleLeft -= 1.5f;  // Bend left knee
 				ankleAngleLeft += 1.0f; // Raise left ankle
-			}
-			else {
-				walkingForward = false;  // Switch to moving backward
+				lowerLegAngleLeft += 2.0f; // Rotate the lower leg at the new joint
 			}
 
-			// Move right leg backward
-			if (hipAngleRight > -30.0f) {
+			if (hipAngleRight > -50.0f) {
 				hipAngleRight -= 2.0f;   // Lower right hip
-				kneeAngleRight += 2.0f;  // Straighten right knee
+				kneeAngleRight += 1.5f;  // Straighten right knee
 				ankleAngleRight -= 1.0f; // Lower right ankle
+				lowerLegAngleRight -= 2.0f; // Rotate the lower leg at the new joint
+			}
+
+			// If both legs have reached their maximum angles, switch direction
+			if (hipAngleLeft >= 50.0f && hipAngleRight <= -50.0f) {
+				walkingForward = false;  // Switch to moving backward
 			}
 		}
 		else { // Move legs in reverse direction (reset position)
-			// Move left leg backward
+			// Move left leg backward, right leg forward
 			if (hipAngleLeft > 0.0f) {
 				hipAngleLeft -= 2.0f;   // Lower left hip
-				kneeAngleLeft += 2.0f;  // Straighten left knee
+				kneeAngleLeft += 1.5f;  // Straighten left knee
 				ankleAngleLeft -= 1.0f; // Lower left ankle
-			}
-			else {
-				walkingForward = true;   // Switch to moving forward
+				lowerLegAngleLeft -= 2.0f; // Reset the lower leg joint angle
 			}
 
-			// Move right leg forward
 			if (hipAngleRight < 0.0f) {
 				hipAngleRight += 2.0f;   // Raise right hip
-				kneeAngleRight -= 2.0f;  // Bend right knee
+				kneeAngleRight -= 1.5f;  // Bend right knee
 				ankleAngleRight += 1.0f; // Raise right ankle
+				lowerLegAngleRight += 2.0f; // Rotate the lower leg at the new joint
+			}
+
+			// If both legs have returned to their starting angles, switch direction
+			if (hipAngleLeft <= 0.0f && hipAngleRight >= 0.0f) {
+				walkingForward = true;   // Switch to moving forward
 			}
 		}
 
@@ -935,6 +940,18 @@ void cannonAnimation(int value)
 	}
 }
 
+void resetJointAngles() {
+	hipAngleLeft = 0.0f;
+	kneeAngleLeft = 0.0f;
+	ankleAngleLeft = 0.0f;
+	lowerLegAngleLeft = 0.0f;
+
+	hipAngleRight = 0.0f;
+	kneeAngleRight = 0.0f;
+	ankleAngleRight = 0.0f;
+	lowerLegAngleRight = 0.0f;
+}
+
 void keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
@@ -950,6 +967,12 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 	case 'b':  // Select body rotation
 		selectedJoint = 4;
+		break;
+	case 'l':  // Control lower part of the left leg (between middle and lower sections)
+		selectedJoint = 5;
+		break;
+	case 'a': // Control ankle
+		selectedJoint = 6;
 		break;
 	case '1':  // Default view (isometric)
 		cameraView = 0;
@@ -967,6 +990,10 @@ void keyboard(unsigned char key, int x, int y)
 		walking = !walking;
 		if (walking) {
 			glutTimerFunc(10, stepAnimation, 0);  // Start walking animation
+		}
+		else {
+			resetJointAngles();  // Reset joint angles when walking stops
+			glutPostRedisplay(); // Trigger a redraw to reflect the reset angles
 		}
 		break;
 	case 'c':  // Toggle cannon spinning
@@ -1015,6 +1042,14 @@ void functionKeys(int key, int x, int y)
 				robotAngle -= 360.0f;
 			}
 		}
+		// Rotate lower left leg
+		else if (selectedJoint == 5) {
+			lowerLegAngleLeft += 2.0f;  // Rotate lower left leg
+		}
+		// Rotate ankle
+		else if (selectedJoint == 6) {
+			ankleAngleLeft += 2.0f;
+		}
 		break;
 
 	case GLUT_KEY_RIGHT:
@@ -1037,6 +1072,14 @@ void functionKeys(int key, int x, int y)
 				robotAngle += 360.0f;
 			}
 		}
+		// Rotate lower left leg in opposite direction
+		else if (selectedJoint == 5) {
+			lowerLegAngleLeft -= 2.0f;  // Rotate lower left leg in the opposite direction
+		}
+		// Rotate ankle
+		else if (selectedJoint == 6) {
+			ankleAngleLeft -= 2.0f;
+		}
 		break;
 
 	case GLUT_KEY_UP:
@@ -1055,6 +1098,14 @@ void functionKeys(int key, int x, int y)
 		else if (selectedJoint == 4) {
 			robotAngle += 2.0f;    // Optional: You can add more functionality for the body here
 		}
+		// Rotate lower left leg in opposite direction
+		else if (selectedJoint == 5) {
+			lowerLegAngleLeft += 2.0f;  // Rotate lower left leg in the opposite direction
+		}
+		// Rotate ankle
+		else if (selectedJoint == 6) {
+			ankleAngleLeft += 2.0f;
+		}
 		break;
 
 	case GLUT_KEY_DOWN:
@@ -1072,6 +1123,14 @@ void functionKeys(int key, int x, int y)
 		}
 		else if (selectedJoint == 4) {
 			robotAngle -= 2.0f;    // Optional: You can add more functionality for the body here
+		}
+		// Rotate lower left leg
+		else if (selectedJoint == 5) {
+			lowerLegAngleLeft -= 2.0f;  // Rotate lower left leg
+		}
+		// Rotate ankle
+		else if (selectedJoint == 6) {
+			ankleAngleLeft -= 2.0f;
 		}
 		break;
 	}
