@@ -887,6 +887,18 @@ void cannonAnimation(int value)
 	}
 }
 
+void resetJointAngles() {
+	hipAngleLeft = 0.0f;
+	kneeAngleLeft = 0.0f;
+	ankleAngleLeft = 0.0f;
+	lowerLegAngleLeft = 0.0f;
+
+	hipAngleRight = 0.0f;
+	kneeAngleRight = 0.0f;
+	ankleAngleRight = 0.0f;
+	lowerLegAngleRight = 0.0f;
+}
+
 void keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
@@ -925,6 +937,10 @@ void keyboard(unsigned char key, int x, int y)
 		walking = !walking;
 		if (walking) {
 			glutTimerFunc(10, stepAnimation, 0);  // Start walking animation
+		}
+		else {
+			resetJointAngles();  // Reset joint angles when walking stops
+			glutPostRedisplay(); // Trigger a redraw to reflect the reset angles
 		}
 		break;
 	case 'c':  // Toggle cannon spinning
